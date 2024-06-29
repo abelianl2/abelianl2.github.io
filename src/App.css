@@ -1,0 +1,19 @@
+#root {
+  text-align: center;
+}
+.page-content {
+  height: calc(100vh - 72px);
+  background: linear-gradient(
+    130deg,
+    rgba(15, 34, 44, 1) 0%,
+    rgba(13, 21, 33, 1) 30%,
+    rgba(13, 21, 33, 1) 84%,
+    rgba(40, 44, 75, 1) 100%
+  );
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}

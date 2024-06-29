@@ -1,0 +1,9 @@
+.page-error {
+    .back-home-btn {
+        --at-apply: border-black selected-none border-solid border-1px px-10px rounded-5px cursor-pointer bg-white color-black transition-300 transition-ease transition-all;
+
+        &:hover {
+            --at-apply: bg-blue color-white;
+        }
+    }
+}

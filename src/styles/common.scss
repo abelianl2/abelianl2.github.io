@@ -1,0 +1,95 @@
+html,
+body {
+  background: #0d1520;
+}
+
+i {
+  font-size: 16px;
+}
+
+input {
+  height: 44px;
+}
+
+input::placeholder {
+  color: #94A3B8 !important;
+}
+
+.ant-btn {
+  box-shadow: none;
+}
+
+.ant-form-item {
+  margin-bottom: 14px;
+}
+
+.ant-table-column-sorter {
+  color: white !important;
+}
+
+.ant-modal {
+  .ant-modal-header {
+    height: 60px;
+    padding: 0 20px;
+    display: flex;
+    --at-apply: flex justify-center items-center;
+  }
+
+  .ant-modal-content {
+    padding: 0;
+  }
+
+  .ant-modal-body {
+    padding: 10px 20px;
+  }
+}
+
+.ant-modal .ant-table-wrapper {
+  border: 1px solid #334155;
+  border-radius: 8px;
+
+  tr>td,
+  th>td {
+    padding: 13px !important;
+  }
+}
+
+.scrollbar {
+  &-x {
+    overflow-x: scroll;
+
+    &::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    &::-webkit-scrollbar-track {
+      border-radius: 2.5px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 2.5px;
+      background-color: #2b2626;
+    }
+
+  }
+
+  &-y {
+    overflow-y: scroll;
+
+    &::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    &::-webkit-scrollbar-track {
+      border-radius: 2.5px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 2.5px;
+      background-color: #2b2626;
+    }
+
+  }
+}

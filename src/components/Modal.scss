@@ -1,0 +1,11 @@
+.modal-box {
+    backdrop-filter: blur(16px);
+    background: rgba(251, 251, 253, 0.6);
+
+    .bg {
+        backdrop-filter: blur(10px);
+        background: rgba(163, 163, 164, 0.1);
+        background: url('../assets//modalIcon.svg') no-repeat left 0 top 0;
+        background-size: 100%;
+    }
+}
