@@ -1,23 +1,29 @@
-import { Button, Form, Input, Radio } from "antd";
-import { RequiredMark } from "antd/es/form/Form";
+import { Button, Form, Input } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { QRCodeSVG } from "qrcode.react";
+import { submitWithMemo } from "../../api/modules/staking";
 export default function Deposit() {
   const [form] = Form.useForm();
   const navigator = useNavigate();
-  const [requiredMark, setRequiredMarkType] =
-    useState<RequiredMark>("optional");
-
-  const onRequiredTypeChange = ({
-    requiredMarkValue,
-  }: {
-    requiredMarkValue: RequiredMark;
-  }) => {
-    setRequiredMarkType(requiredMarkValue);
-  };
   const handleBack = () => {
     navigator("/ABELStaking");
+  };
+  const [loading, setLoading] = useState(false);
+  const [code, setCode] = useState("");
+  const handleSubmit = async () => {
+    try {
+      const formData = await form.validateFields({ validateOnly: true });
+      try {
+        setLoading(true);
+        const data = await submitWithMemo(formData);
+        setCode(data.redirect);
+      } finally {
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
   return (
     <div className="page-deposit relative flex items-center justify-center h-100%">
@@ -30,23 +36,32 @@ export default function Deposit() {
       <div className="max-w-840px min-w-500px w-100%">
         <div className="font-size-30px mb-20px">Deposit ABEL to get QDAY</div>
         <div>
-          <Form
-            form={form}
-            layout="vertical"
-            initialValues={{ requiredMarkValue: requiredMark }}
-            onValuesChange={onRequiredTypeChange}
-            requiredMark={requiredMark}
-          >
+          <Form form={form} layout="vertical" name="validateOnly">
             <div className="flex">
               <div className="flex-1">
-                <Form.Item label="From Network" required>
+                <Form.Item
+                  label="From Network"
+                  name="from_network"
+                  rules={[{ required: true }]}
+                >
                   <Input placeholder="input placeholder" />
                 </Form.Item>
-                <Form.Item label="From Address">
+                <Form.Item
+                  name="from_address"
+                  label="From Address"
+                  rules={[{ required: true }]}
+                >
                   <Input placeholder="Enter address" />
                 </Form.Item>
-                <Form.Item label="Amount of Abel to deposit">
-                  <Input placeholder="Enter the amount of ABEL you will deposit for Qday" />
+                <Form.Item
+                  name="amount"
+                  label="Amount of Abel to deposit"
+                  rules={[{ required: true }]}
+                >
+                  <Input
+                    placeholder="Enter the amount of ABEL you will deposit for Qday"
+                    type="number"
+                  />
                 </Form.Item>
               </div>
               <div className="flex flex-col justify-around mx-18px">
@@ -55,31 +70,61 @@ export default function Deposit() {
                 <i className="i-mi-arrow-right font-size-24px"></i>
               </div>
               <div className="flex-1">
-                <Form.Item label="To Network" required>
-                  <Input placeholder="input placeholder" />
+                <Form.Item
+                  name="to_network"
+                  label="To Network"
+                  rules={[{ required: true }]}
+                >
+                  <Input placeholder="Input To Network" />
                 </Form.Item>
-                <Form.Item label="To Address">
+                <Form.Item
+                  name="to_address"
+                  label="To Address"
+                  rules={[{ required: true }]}
+                >
                   <Input placeholder="Enter address" />
                 </Form.Item>
-                <Form.Item label="Amount of Qday to Receive">
-                  <Input placeholder="Enter Amount of Qday to Receive" />
+                <Form.Item
+                  name="amount"
+                  label="Amount of Qday to Receive"
+                  rules={[{ required: true }]}
+                >
+                  <Input
+                    placeholder="Enter Amount of Qday to Receive"
+                    type="number"
+                  />
                 </Form.Item>
               </div>
             </div>
-            <div className="flex justify-center items-center">
+            <div className="flex justify-center items-center my-10px">
               <Form.Item>
-                <Button type="primary">Generate QR Code for Abelian Pro</Button>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  onClick={handleSubmit}
+                >
+                  Generate QR Code for Abelian Pro
+                </Button>
               </Form.Item>
             </div>
           </Form>
           <div className="code-box flex justify-center items-center">
-            <div>
-              <div></div>
-              <div className="font-size-14px w-320px text-center">
-                Please use Abelian Pro to scan this QR Code and submit the
-                transaction.
+            {code ? (
+              <div>
+                <div className="flex justify-center items-center mb-10px">
+                  <div className="border-6px border-solid border-white flex items-center justify-center">
+                    <QRCodeSVG value={code} size={140} level="L" />
+                  </div>
+                </div>
+                <div className="font-size-14px w-320px text-center">
+                  Please use Abelian Pro to scan this QR Code and submit the
+                  transaction.
+                </div>
               </div>
-            </div>
+            ) : (
+              <></>
+            )}
           </div>
         </div>
       </div>

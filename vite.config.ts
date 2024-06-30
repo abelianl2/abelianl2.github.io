@@ -69,11 +69,10 @@ export default defineConfig({
     // https: true,
     port: 5176,
     proxy: {
-      "/botapi": {
-        // target: "https://miniapp.linklayer.ai/botapi",
-        target: "http://192.168.85.17:8888",
+      "/api": {
+        target: "https://deposit-test.qday.ninja:9002",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/botapi/, ""),
+        rewrite: (path) => path.replace(/^\/api/, "/api"),
       },
     },
   },
