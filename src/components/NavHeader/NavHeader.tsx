@@ -1,13 +1,5 @@
 import { Button, Popover } from "antd";
-import { useEffect } from "react";
-import {
-  CHAIN_ID,
-  RPC_URL,
-  provider,
-  web3Modal,
-  CHAIN_LOGO,
-  CHAIN_NAME,
-} from "../../utils/web3Modal";
+import { provider, web3Modal } from "../../utils/web3Modal";
 import { useWeb3ModalAccount } from "@web3modal/ethers5/react";
 import { addressDots } from "../../utils/utils";
 

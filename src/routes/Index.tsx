@@ -7,9 +7,9 @@ import LazyLoad from "./LazyLoad.tsx";
 const Dashboard = lazy(() => import("../views/Dashboard/Dashboard.tsx"));
 const QdayBridge = lazy(() => import("../views/QdayBridge/QdayBridge.tsx"));
 const QdaySwap = lazy(() => import("../views/QdaySwap/QdaySwap.tsx"));
-const QdayStaking = lazy(() => import("../views/ABELStaking/ABELStaking.tsx"));
+const ABELStaking = lazy(() => import("../views/ABELStaking/ABELStaking.tsx"));
 const QdayLend = lazy(() => import("../views/QdayLend/QdayLend.tsx"));
-const ABELStaking = lazy(() => import("../views/QdayStaking/QdayStaking.tsx"));
+const QdayStaking = lazy(() => import("../views/QdayStaking/QdayStaking.tsx"));
 const Deposit = lazy(() => import("../views/Deposit/Deposit.tsx"));
 
 const Error = lazy(() => import("../views/Error/Error.tsx"));
