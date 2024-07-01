@@ -1,7 +1,8 @@
 export const ANTD_THEME = {
   token: {
     colorBgContainer: "#0B1624",
-    colorBgElevated: "black",
+    colorBgElevated: "#0F1E2F",
+    colorPrimaryHover: "#333",
     colorText: "#F1F5F9",
     boxShadowSecondary:
       "0 6px 16px 0 rgba(0, 0, 0, 0.1), 0 3px 6px -4px rgba(0, 0, 0, 0.2), 0 9px 28px 8px rgba(0, 0, 0, 0.3)",
@@ -37,6 +38,9 @@ export const ANTD_THEME = {
     Skeleton: {
       //   gradientFromColor: 'rgba(255, 255, 255, 0.12)',
       //   gradientToColor: 'rgba(255, 255, 255, 0.18)',
+    },
+    Select: {
+      optionSelectedBg: "#0A171F",
     },
     Modal: {
       headerBg: "#1D2E40",

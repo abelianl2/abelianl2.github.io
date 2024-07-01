@@ -1,4 +1,4 @@
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, Select } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
@@ -16,13 +16,37 @@ export default function Deposit() {
       const formData = await form.validateFields({ validateOnly: true });
       try {
         setLoading(true);
-        const data = await submitWithMemo(formData);
+        const data = await submitWithMemo({
+          ...formData,
+          lockupPeriod: formData.lockupPeriod * 30,
+        });
         setCode(data.redirect);
+        form.resetFields();
       } finally {
         setLoading(false);
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const options = [
+    { value: 6, label: "6 Month" },
+    { value: 9, label: "9 Month" },
+    { value: 12, label: "12 Month" },
+  ];
+  const handleChange = (e: number) => {
+    console.log(form);
+    switch (e) {
+      case 6:
+        form.setFieldValue("rewardRatio", 1);
+        break;
+      case 9:
+        form.setFieldValue("rewardRatio", 2);
+        break;
+      case 12:
+        form.setFieldValue("rewardRatio", 3);
+        break;
     }
   };
   return (
@@ -53,19 +77,8 @@ export default function Deposit() {
                 >
                   <Input placeholder="Enter address" />
                 </Form.Item>
-                <Form.Item
-                  name="amount"
-                  label="Amount of Abel to deposit"
-                  rules={[{ required: true }]}
-                >
-                  <Input
-                    placeholder="Enter the amount of ABEL you will deposit for Qday"
-                    type="number"
-                  />
-                </Form.Item>
               </div>
               <div className="flex flex-col justify-around mx-18px">
-                <i className="i-mi-arrow-right font-size-24px"></i>
                 <i className="i-mi-arrow-right font-size-24px"></i>
                 <i className="i-mi-arrow-right font-size-24px"></i>
               </div>
@@ -84,15 +97,48 @@ export default function Deposit() {
                 >
                   <Input placeholder="Enter address" />
                 </Form.Item>
+              </div>
+            </div>
+            <div>
+              <Form.Item
+                name="amount"
+                label="Amount of Abel to deposit"
+                rules={[{ required: true }]}
+              >
+                <Input
+                  placeholder="Enter the amount of ABEL you will deposit for Qday"
+                  type="number"
+                />
+              </Form.Item>
+            </div>
+            {/* lockupPeriod  rewardRatio */}
+            <div className="flex justify-between">
+              <div className="w-45%">
                 <Form.Item
-                  name="amount"
-                  label="Amount of Qday to Receive"
-                  rules={[{ required: true }]}
+                  name="lockupPeriod"
+                  label="Lock-up period"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select the lock-up period",
+                    },
+                  ]}
                 >
-                  <Input
-                    placeholder="Enter Amount of Qday to Receive"
-                    type="number"
-                  />
+                  <Select options={options} onChange={handleChange}></Select>
+                </Form.Item>
+              </div>
+              <div className="w-45%">
+                <Form.Item
+                  name="rewardRatio"
+                  label="Reward ratio"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select the lock-up period",
+                    },
+                  ]}
+                >
+                  <Input readOnly></Input>
                 </Form.Item>
               </div>
             </div>
