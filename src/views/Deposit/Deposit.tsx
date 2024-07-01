@@ -7,7 +7,7 @@ export default function Deposit() {
   const [form] = Form.useForm();
   const navigator = useNavigate();
   const handleBack = () => {
-    navigator("/ABELStaking");
+    navigator("/QdayStaking");
   };
   const [loading, setLoading] = useState(false);
   const [code, setCode] = useState("");
