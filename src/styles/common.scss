@@ -11,16 +11,23 @@ input {
   height: 44px;
 }
 
-input::placeholder {
-  color: #94A3B8 !important;
-}
-
 .ant-btn {
   box-shadow: none;
 }
 
 .ant-form-item {
   margin-bottom: 14px;
+}
+
+.ant-select {
+  height: 44px !important;
+
+  input,
+  .ant-form-item-control-input,
+  .ant-selector {
+    height: 44px !important;
+
+  }
 }
 
 .ant-table-column-sorter {

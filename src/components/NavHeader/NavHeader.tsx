@@ -1,4 +1,16 @@
-import { Button } from "antd";
+import { Button, Popover } from "antd";
+import { useEffect } from "react";
+import {
+  CHAIN_ID,
+  RPC_URL,
+  provider,
+  web3Modal,
+  CHAIN_LOGO,
+  CHAIN_NAME,
+} from "../../utils/web3Modal";
+import { useWeb3ModalAccount } from "@web3modal/ethers5/react";
+import { addressDots } from "../../utils/utils";
+
 export default function NavHeader() {
   const HEADER_MENUS = [
     {
@@ -18,6 +30,17 @@ export default function NavHeader() {
       label: "History",
     },
   ];
+  const { address, isConnected } = useWeb3ModalAccount();
+  const handleConnect = async () => {
+    await web3Modal.open();
+    console.log("provider", provider);
+
+    console.log("web3Modal", web3Modal);
+  };
+  const handleDisconnect = () => {
+    web3Modal.disconnect();
+  };
+
   return (
     <div className="flex bg-#141E2A h-72px justify-between items-center">
       <div className="flex px-20px">
@@ -28,13 +51,30 @@ export default function NavHeader() {
         ))}
       </div>
       <div className="flex items-center font-size-24px pr-40px">
-        <i className="i-material-symbols-help-outline cursor-pointer"></i>
+        <i className="i-material-symbols-help-outline cursor-pointer font-size-20px"></i>
         <div className="w-0 border-r-1px border-r-solid border-r-#94A3B8 h-24px mx-20px"></div>
-        <i className="i-ic-outline-notifications-none  cursor-pointer"></i>
+        <i className="i-ic-outline-notifications-none  cursor-pointer font-size-20px"></i>
         <div className="w-0 border-r-1px border-r-solid border-r-#94A3B8 h-24px  mx-20px"></div>
-        <Button type="primary">Connect</Button>
+        {isConnected ? (
+          <Popover
+            content={
+              <Button type="primary" onClick={handleDisconnect}>
+                Disconnect
+              </Button>
+            }
+          >
+            <span className="font-size-16px color-#94A3B8 cursor-pointer">
+              {addressDots(address || "", 5, 5)}
+            </span>
+          </Popover>
+        ) : (
+          <Button type="primary" onClick={handleConnect}>
+            Connect
+          </Button>
+        )}
+
         <div className="w-0 border-r-1px border-r-solid border-r-#94A3B8 h-24px  mx-20px"></div>
-        <i className="i-ph-globe-simple  cursor-pointer"></i>
+        <i className="i-ph-globe-simple  cursor-pointer font-size-20px"></i>
       </div>
     </div>
   );

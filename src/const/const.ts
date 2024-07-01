@@ -2,8 +2,9 @@ export const ANTD_THEME = {
   token: {
     colorBgContainer: "#0B1624",
     colorBgElevated: "#0F1E2F",
-    colorPrimaryHover: "#333",
+    colorPrimaryHover: "#0e5ece",
     colorText: "#F1F5F9",
+    colorTextPlaceholder: "#94a3b8",
     boxShadowSecondary:
       "0 6px 16px 0 rgba(0, 0, 0, 0.1), 0 3px 6px -4px rgba(0, 0, 0, 0.2), 0 9px 28px 8px rgba(0, 0, 0, 0.3)",
   },
@@ -19,7 +20,7 @@ export const ANTD_THEME = {
     },
     Button: {
       defaultBg: "#122744",
-      defaultColor: "#818991",
+      defaultColor: "white",
       defaultHoverBg: '"#122774"',
       defaultActiveBg: "",
       defaultBorderColor: "#122744",

@@ -87,7 +87,7 @@ export default function StakingCard() {
             <div>8,620.1258</div>
           </div>
           <div className="flex justify-between">
-            <div className="color-#94A3B8">Claimable:</div>
+            <div className="color-#94A3B8">Unclaimable:</div>
             <div>8,620.1258</div>
           </div>
         </div>

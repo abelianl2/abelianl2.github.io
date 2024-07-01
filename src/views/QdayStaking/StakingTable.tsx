@@ -3,7 +3,7 @@ import { useState } from "react";
 import success from "../../assets/success.svg";
 interface StakerTableProps {
   dataSource: Array<any>;
-  sorter: (order: string) => void;
+  sorter?: (order: string) => void;
   loading: boolean;
 }
 
@@ -60,12 +60,18 @@ export default function StakingTable(props: StakerTableProps) {
       render(row) {
         // return <div className="color-#65EC9B cursor-pointer">Completed</div>;
         // return <div className="color-#FE675D cursor-pointer">Failed</div>;
+        //  <div
+        //     className="color-#FFD400 cursor-pointer"
+        //     onClick={() => setShow(true)}
+        //   >
+        //     Pending
+        //   </div>
         return (
           <div
-            className="color-#FFD400 cursor-pointer"
+            className="color-#65EC9B cursor-pointer"
             onClick={() => setShow(true)}
           >
-            Pending
+            Completed
           </div>
         );
       },

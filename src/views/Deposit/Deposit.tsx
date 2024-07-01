@@ -124,7 +124,11 @@ export default function Deposit() {
                     },
                   ]}
                 >
-                  <Select options={options} onChange={handleChange}></Select>
+                  <Select
+                    options={options}
+                    onChange={handleChange}
+                    placeholder="Select a period"
+                  ></Select>
                 </Form.Item>
               </div>
               <div className="w-45%">
