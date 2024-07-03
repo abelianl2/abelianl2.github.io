@@ -59,29 +59,13 @@ export default function QdayStaking() {
       const res = await contractCore.current?.totalStake();
       console.log("res", res.toString());
       setTotalStake(res);
-      // console.log(
-      //   "全网总质押金额",
-      //   res.map((item: ethers.BigNumberish) => formatEther(item))
-      // );
-
       const res2 = await contractCore.current?.userStake(address);
-      // const newRes2 = res2.map((item: ethers.BigNumberish) => ({
-      //   amount: formatEther(item),
-      // }));
       console.log("定账户质押金额", res2.toString());
-      // setUserStake(newRes2);
-
       const res3 = await contractWebl.current?.lockedBalance(address);
-      // const newRes3 = res3.map((item: ethers.BigNumberish) => ({
-      //   amount: formatEther(item),
-      // }));
       console.log("指定账户锁仓总额", res3.toString());
       const res4 = await contractWebl.current?.lockedDetail(address);
 
       console.log("锁仓详情列表", res4.toString());
-      // const newRes4 = res4.map((item: ethers.BigNumberish) => ({
-      //   amount: formatEther(item),
-      // }));
     } catch (err) {
       console.error("err", err);
     } finally {
@@ -97,17 +81,6 @@ export default function QdayStaking() {
 
   return (
     <div className="page-abelstaking">
-      {/* <div className="flex">
-        <div>
-          <img src={logo} className="h-100px" alt="" />
-        </div>
-        <div className="flex flex-col justify-between py-10px ml-32px">
-          <div className="font-size-18px">Staking ABEL, Earn QDAY</div>
-          <div className="flex">
-            <img src={wel} className="h-50px" alt="" />
-          </div>
-        </div>
-      </div> */}
       <div className="flex flex-col gap-14px">
         <CardBG>
           <TotalCard />
