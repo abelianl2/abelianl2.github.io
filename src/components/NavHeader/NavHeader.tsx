@@ -1,6 +1,6 @@
 import { Button, Popover } from "antd";
-import { provider, web3Modal } from "../../utils/web3Modal";
-import { useWeb3ModalAccount } from "@web3modal/ethers5/react";
+import { web3Modal } from "../../utils/web3Modal";
+import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { addressDots } from "../../utils/utils";
 
 export default function NavHeader() {
@@ -25,9 +25,6 @@ export default function NavHeader() {
   const { address, isConnected } = useWeb3ModalAccount();
   const handleConnect = async () => {
     await web3Modal.open();
-    console.log("provider", provider);
-
-    console.log("web3Modal", web3Modal);
   };
   const handleDisconnect = () => {
     web3Modal.disconnect();

@@ -39,7 +39,7 @@ export default function StakingCard() {
             <div className="font-size-14px">
               APR{" "}
               <Popover content="Estimated ARR and APR in detail">
-                <i className="i-material-symbols-help"></i>
+                <i className="i-material-symbols-help font-size-18px"></i>
               </Popover>
             </div>
             <div className="flex items-center color-white font-size-20px">
@@ -50,7 +50,7 @@ export default function StakingCard() {
             <div className="font-size-14px">
               Estimated earning{" "}
               <Popover content="Estimated QDAY earning in the next 24 hours">
-                <i className="i-material-symbols-help"></i>
+                <i className="i-material-symbols-help font-size-18px"></i>
               </Popover>
             </div>
             <div className="flex items-center color-white font-size-20px">

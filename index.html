@@ -9,18 +9,44 @@
   <style>
     html,
     body {
-      background: linear-gradient(130deg,
-          rgba(15, 34, 44, 1) 0%,
-          rgba(13, 21, 33, 1) 30%,
-          rgba(13, 21, 33, 1) 84%,
-          rgba(40, 44, 75, 1) 100%);
+      background: #0d1520;
+    }
+
+    #loading-root {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    #root {
+      display: none;
     }
   </style>
+
 </head>
 
-<body>
+<body class="scrollbar-y">
   <div id="root"></div>
+  <div id="loading-root">
+    <img src="/loading.svg" alt="">
+  </div>
   <script type="module" src="/src/main.tsx"></script>
+  <script>window.onload = function () {
+      var t = setTimeout(() => {
+        document.getElementById('root').style.display = 'block'
+        document.getElementById('loading-root').style.display = 'none'
+        setTimeout(t)
+      }, 500)
+    }
+
+  </script>
 </body>
 
 </html>

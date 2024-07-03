@@ -1,7 +1,7 @@
 export const ANTD_THEME = {
   token: {
     colorBgContainer: "#0B1624",
-    colorBgElevated: "#0F1E2F",
+    colorBgElevated: "#000",
     colorPrimaryHover: "#0e5ece",
     colorText: "#F1F5F9",
     colorTextPlaceholder: "#94a3b8",
