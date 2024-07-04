@@ -1,8 +1,5 @@
 import { service } from "../services";
-const API_PATH =
-  import.meta.env.VITE_ENV === "dev"
-    ? "/api"
-    : "https://deposit-test.qday.ninja:9002";
+const API_PATH = "/api";
 export type SubmitWithMemoParams = {
   from_network: string;
   to_network: string;
