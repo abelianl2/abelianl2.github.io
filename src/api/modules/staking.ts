@@ -1,5 +1,8 @@
 import { service } from "../services";
-
+const API_PATH =
+  import.meta.env.VITE_ENV === "dev"
+    ? "/api"
+    : "https://deposit-test.qday.ninja:9002";
 export type SubmitWithMemoParams = {
   from_network: string;
   to_network: string;
@@ -13,5 +16,5 @@ export type SubmitWithMemoResponse = {
 export const submitWithMemo = (
   params: SubmitWithMemoParams
 ): Promise<SubmitWithMemoResponse> => {
-  return service.post("/api/bridge/submitWithMemo", params);
+  return service.post(`${API_PATH}/bridge/submitWithMemo`, params);
 };
