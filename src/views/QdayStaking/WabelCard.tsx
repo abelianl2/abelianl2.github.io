@@ -1,14 +1,25 @@
 import { Table, TableColumnsType, Modal, Button } from "antd";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import success from "../../assets/success.svg";
-
+import {
+  RPC_URL,
+  getContractInstance,
+  wabelContract,
+} from "../../utils/web3Modal";
+import { JsonRpcProvider, ethers } from "ethers";
+import wablABI from "../../assets/json/WAbl.json";
+import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 export type RewardListItem = {
   amount: string;
   date: string;
   status: string;
 };
 export default function WabelCard() {
-  const [list] = useState([]);
+  // lockedDetail
+  const { address, isConnected } = useWeb3ModalAccount();
+  const provider = new JsonRpcProvider(RPC_URL);
+  const contractWebl = useRef<ethers.Contract>();
+  const [list, setList] = useState([]);
   const [show, setShow] = useState(false);
   const columns: TableColumnsType<RewardListItem> = [
     {
@@ -34,7 +45,7 @@ export default function WabelCard() {
       align: "center",
       dataIndex: "action",
       key: "action",
-      render(row) {
+      render() {
         // return <div className="color-#65EC9B cursor-pointer">Completed</div>;
         // return <div className="color-#FE675D cursor-pointer">Failed</div>;
         //  <div
@@ -54,6 +65,22 @@ export default function WabelCard() {
       },
     },
   ];
+  const handleGetList = async () => {
+    contractWebl.current = await getContractInstance(
+      provider,
+      wabelContract,
+      wablABI.abi
+    );
+    const data = await contractWebl.current?.lockedDetail(address);
+    console.log("data", JSON.stringify(data));
+  };
+
+  useEffect(() => {
+    if (address && isConnected) {
+      handleGetList();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, isConnected]);
   return (
     <div>
       <Table dataSource={list} columns={columns}></Table>

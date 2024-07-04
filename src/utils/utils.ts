@@ -41,3 +41,14 @@ export function addressDots(v: string | number, len = 12, lastlen = 12) {
         newstr.slice(newstr.length - lastlen, newstr.length)
     : "";
 }
+
+// 保留位数
+export function toFixed(val: string | number, FIXED_LEN = 4) {
+  if (!val) return 0;
+  let muVal = "1";
+  for (let i = 0; i < FIXED_LEN; i++) {
+    muVal += "0";
+  }
+  const intMuVal = Number(muVal);
+  return Math.floor(Number(val) * intMuVal) / intMuVal;
+}

@@ -34,7 +34,7 @@ export default function RewardTable() {
       align: "center",
       dataIndex: "action",
       key: "action",
-      render(row) {
+      render() {
         // return <div className="color-#65EC9B cursor-pointer">Completed</div>;
         // return <div className="color-#FE675D cursor-pointer">Failed</div>;
         //  <div

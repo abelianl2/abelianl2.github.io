@@ -1,17 +1,16 @@
-import { useWeb3ModalAccount } from "@web3modal/ethers5/react";
 import { Input, Button, message } from "antd";
-import { JsonRpcApiProvider, ethers, formatUnits, parseEther } from "ethers";
-import { MutableRefObject, useEffect, useState } from "react";
+import { JsonRpcProvider, parseEther } from "ethers";
+import { useEffect, useState } from "react";
 import { useWeb3ModalProvider } from "@web3modal/ethers/react";
 import qdayCoreABI from "../../assets/json/QdayCore.json";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
-import { qdayContract } from "../../utils/web3Modal";
+import { RPC_URL, qdayContract } from "../../utils/web3Modal";
 import RewardTable from "./RewardTable";
-type ToStakeCardProps = {
-  qdayCoreContract: MutableRefObject<ethers.Contract | undefined>;
-};
-export default function ToStakeCard(props: ToStakeCardProps) {
+import { eventBus } from "../../events/events";
+
+export default function ToStakeCard() {
   const [stakeVal, setStake] = useState("");
+  const provider = new JsonRpcProvider(RPC_URL);
   const [messageApi, MessageContext] = message.useMessage();
   // const provider = new JsonRpcProvider(RPC_URL);
   const [loading, setLoading] = useState(false);
@@ -22,7 +21,7 @@ export default function ToStakeCard(props: ToStakeCardProps) {
       messageApi.warning("Enter the stake amount");
       return;
     }
-    if (!props.qdayCoreContract.current) {
+    if (!provider) {
       messageApi.warning(
         "The contract instance is being initialized, please wait"
       );
@@ -30,42 +29,32 @@ export default function ToStakeCard(props: ToStakeCardProps) {
     }
     if (walletProvider) {
       setLoading(true);
-      try {
-        console.log("wei", formatUnits(parseEther(stakeVal), "wei"));
-
-        writeContract({
-          address: qdayContract,
-          abi: qdayCoreABI.abi,
-          functionName: "stakeWithQday",
-          value: formatUnits(parseEther(stakeVal), "wei"),
-        });
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+      writeContract({
+        address: qdayContract,
+        abi: qdayCoreABI.abi,
+        functionName: "stakeWithQday",
+        value: parseEther(stakeVal),
+      });
     }
   };
-  const {
-    isLoading: isConfirming,
-    isSuccess: isConfirmed,
-    isError,
-  } = useWaitForTransactionReceipt({
-    hash,
-  });
+
+  const { status, data } = useWaitForTransactionReceipt({ hash });
 
   useEffect(() => {
-    if (isError) {
-      messageApi.error("交易失败");
+    if (data) {
+      setLoading(false);
     }
-    if (isConfirmed) {
-      messageApi.success("交易成功");
-    }
-    if (isConfirming) {
-      messageApi.loading("交易正在进行中", 0);
+    if (status) {
+      if (status === "success" || data?.status) {
+        messageApi.success("交易成功");
+        eventBus.emit("updateEvent");
+      }
+      if (status === "error" && !data?.status) {
+        messageApi.success("交易失败");
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConfirming, isConfirmed, isError]);
+  }, [hash, status, data]);
   return (
     <>
       {MessageContext}
