@@ -5,9 +5,9 @@ import { Core } from "@walletconnect/core";
 import { EthereumProvider } from "@walletconnect/ethereum-provider";
 import { ethers } from "ethers";
 
-export const qdayContract = "0x4098B8f5Da5F4828F29e216dF435673Db81E163e";
-export const wabelContract = "0xE5A980C37C16E440B672F33e601b7d2312dF2E34";
-export const veContract = "0xBE3d573fCf3d7b39746930B800fd66dB0F7CBDcD";
+export const qdayContract = "0xD7933fd41EB93680Ba615b87eEC99D76aa5E007C";
+export const wabelContract = "0xe72cD8746ddEFEF0f5Eb25c3781019179d1Dc5D9";
+export const veContract = "0x141A575660EDDE03Ed915284859108BCfBA350aF";
 export const projectId = "fcecdc049765b0a170b43b92bba0ccf3";
 export const CHAIN_ID = 1001;
 export const VITE_HOST = import.meta.env.VITE_HOST;

@@ -19,7 +19,7 @@ export default function WabelCard() {
   const { address, isConnected } = useWeb3ModalAccount();
   const provider = new JsonRpcProvider(RPC_URL);
   const contractWebl = useRef<ethers.Contract>();
-  const [list, setList] = useState([]);
+  const [list] = useState([]);
   const [show, setShow] = useState(false);
   const columns: TableColumnsType<RewardListItem> = [
     {

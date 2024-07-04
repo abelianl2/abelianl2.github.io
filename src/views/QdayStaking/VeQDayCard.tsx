@@ -11,7 +11,7 @@ export default function VeQDayCard() {
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
   const [loading4, setLoading4] = useState(false);
-  const [loading5, setLoading5] = useState(false);
+  const [, setLoading5] = useState(false);
   const [loading6, setLoading6] = useState(false);
   const [messageApi, MessageContext] = message.useMessage();
   const { data: hash, writeContract: writeVeQdayContract } = useWriteContract();
