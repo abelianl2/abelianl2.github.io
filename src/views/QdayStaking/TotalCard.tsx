@@ -26,6 +26,8 @@ export default function TotalCard() {
   const [userStakeVal, setUserStakeVal] = useState("0");
   const [mywabel, setmywabel] = useState("0");
   const [unLockReward, setUnLockReward] = useState("0");
+  const [totalReward, setTotalReward] = useState("0");
+  const [myReward, setMyReward] = useState("0");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleGetData = async () => {
     try {
@@ -33,7 +35,16 @@ export default function TotalCard() {
       const res: bigint = await contractCore.current?.totalStake();
       setTotalStake(toFixed(formatEther(res ? res.toString() : "0")) + "");
       const res2 = await contractCore.current?.userStake(address);
+
       setUserStakeVal(toFixed(formatEther(res2 ? res2.toString() : "0")) + "");
+      const totReward = await contractCore.current?.totalReward();
+      setTotalReward(
+        toFixed(formatEther(totReward ? totReward.toString() : "0")) + ""
+      );
+      const mReward = await contractCore.current?.claimedReward(address);
+      setMyReward(
+        toFixed(formatEther(mReward ? mReward.toString() : "0")) + ""
+      );
       const res6 = await contractCore.current?.unlockedReward(address);
       setUnLockReward(toFixed(formatEther(res6 ? res6.toString() : "0")) + "");
       // 查询我的WEBAL
@@ -95,7 +106,7 @@ export default function TotalCard() {
   });
   return (
     <div className="flex  h-120px font-size-12px gap-10px">
-      <div className="flex-1 w-33% h-100% flex flex-col justify-between">
+      <div className="flex-1 w-25% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>全网质押veQday</div>
           <div>{totalStake}QDAY</div>
@@ -111,15 +122,12 @@ export default function TotalCard() {
         </div>
       </div>
 
-      <div className="flex-1 w-33% h-100% flex flex-col justify-between">
+      <div className="flex-1 w-25% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>我的质押veQday</div>
           <div>{userStakeVal}QDAY</div>
         </div>
-        {/* <div className="flex flex-col justify-between">
-          <div>我的收益</div>
-          <div>10000QDAY</div>
-        </div> */}
+
         <div className="flex flex-col justify-between">
           <div>待提现奖金</div>
           <div>
@@ -131,19 +139,22 @@ export default function TotalCard() {
         </div>
       </div>
 
-      <div className="flex-1 w-33% h-100% flex flex-col justify-between">
+      <div className="flex-1 w-25% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>我的余额</div>
           <div>{balance} QDAY</div>
         </div>
         <div className="flex flex-col justify-between">
-          {/* <div>待领取奖金</div>
-          <div>10000QDAY</div> */}
+          <div>全网总收益</div>
+          <div>{totalReward}QDAY</div>
         </div>
       </div>
-      {/* <div className="flex-1 w-20% h-100% flex flex-col justify-between">
-  
-      </div> */}
+      <div className="flex-1 w-25% h-100% flex flex-col justify-between">
+        <div className="flex flex-col justify-between">
+          <div>我已提取的QDay收益</div>
+          <div>{myReward}QDAY</div>
+        </div>
+      </div>
     </div>
   );
 }
