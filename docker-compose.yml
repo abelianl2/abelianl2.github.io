@@ -1,0 +1,8 @@
+version: '3.5'
+services:
+  bridge-ui:
+    image: ghcr.io/abelianl2/bridge-ui:0.1.0
+    ports:
+      - "8001:80"
+    volumes:
+      - ./dist:/usr/share/nginx/html
