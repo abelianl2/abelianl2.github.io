@@ -3,7 +3,7 @@ import { useState } from "react";
 // import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { submitWithMemo } from "../../api/modules/staking";
-import { lockUpPeriod } from "../../const/enum";
+import { lockUpPeriod, isProd } from "../../const/enum";
 export default function ABELStaking() {
   const [form] = Form.useForm();
   // const navigator = useNavigate();
@@ -19,7 +19,7 @@ export default function ABELStaking() {
         setLoading(true);
         const data = await submitWithMemo({
           ...formData,
-          lockupPeriod: formData.lockupPeriod * 30,
+          lockupPeriod: formData.lockupPeriod * (isProd ? 30 : 1),
         });
         setCode(data.redirect);
         form.resetFields();
