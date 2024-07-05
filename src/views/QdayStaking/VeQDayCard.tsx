@@ -122,7 +122,7 @@ export default function VeQDayCard() {
       handleLoadReceipt(hash6, "解除质押").finally(() => setLoading4(false));
     if (unStakeErr) {
       messageApi.error(unStakeErr.message);
-      setLoading(false);
+      setLoading4(false);
     }
     if (qDayErr) {
       messageApi.error(qDayErr.message);
@@ -130,7 +130,8 @@ export default function VeQDayCard() {
     }
     if (veDayErr) {
       messageApi.error(veDayErr.message);
-      setLoading4(false);
+
+      setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hash, hash2, hash6, unStakeErr, qDayErr, veDayErr]);

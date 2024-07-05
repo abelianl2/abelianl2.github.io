@@ -3,6 +3,7 @@ import { useState } from "react";
 // import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { submitWithMemo } from "../../api/modules/staking";
+import { lockUpPeriod } from "../../const/enum";
 export default function ABELStaking() {
   const [form] = Form.useForm();
   // const navigator = useNavigate();
@@ -30,24 +31,9 @@ export default function ABELStaking() {
     }
   };
 
-  const options = [
-    { value: 6, label: "6 Month" },
-    { value: 9, label: "9 Month" },
-    { value: 12, label: "12 Month" },
-  ];
   const handleChange = (e: number) => {
-    console.log(form);
-    switch (e) {
-      case 6:
-        form.setFieldValue("rewardRatio", 1);
-        break;
-      case 9:
-        form.setFieldValue("rewardRatio", 2);
-        break;
-      case 12:
-        form.setFieldValue("rewardRatio", 3);
-        break;
-    }
+    const v = lockUpPeriod.find((item) => item.value === e);
+    form.setFieldValue("rewardRatio", v?.ratio);
   };
   return (
     <div className="page-deposit relative flex items-center justify-center h-100%">
@@ -119,7 +105,7 @@ export default function ABELStaking() {
                   ]}
                 >
                   <Select
-                    options={options}
+                    options={lockUpPeriod}
                     onChange={handleChange}
                     placeholder="Select a period"
                   ></Select>

@@ -219,8 +219,8 @@ export default function TotalCard() {
 
       <div className="flex-1 w-25% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
-          <div>我的余额</div>
-          <div>{balance} QDAY</div>
+          <div>我的收益</div>
+          <div>{myReward}QDAY</div>
         </div>
         <div className="flex flex-col justify-between">
           <div>全网总收益</div>
@@ -229,8 +229,8 @@ export default function TotalCard() {
       </div>
       <div className="flex-1 w-25% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
-          <div>我已提取的QDay收益</div>
-          <div>{myReward}QDAY</div>
+          <div>我的余额</div>
+          <div>{balance} QDAY</div>
         </div>
       </div>
     </div>
