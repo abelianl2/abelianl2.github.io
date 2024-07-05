@@ -1,25 +1,25 @@
 import { Table, TableColumnsType, Modal, Button } from "antd";
 import { useEffect, useRef, useState } from "react";
 import success from "../../assets/success.svg";
+import dayjs from "dayjs";
 import {
   RPC_URL,
   getContractInstance,
   wabelContract,
 } from "../../utils/web3Modal";
-import { JsonRpcProvider, ethers } from "ethers";
+import { JsonRpcProvider, ethers, formatEther } from "ethers";
 import wablABI from "../../assets/json/WAbl.json";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 export type RewardListItem = {
   amount: string;
   date: string;
-  status: string;
 };
 export default function WabelCard() {
   // lockedDetail
   const { address, isConnected } = useWeb3ModalAccount();
   const provider = new JsonRpcProvider(RPC_URL);
   const contractWebl = useRef<ethers.Contract>();
-  const [list] = useState([]);
+  const [list, setList] = useState<Array<RewardListItem>>([]);
   const [show, setShow] = useState(false);
   const columns: TableColumnsType<RewardListItem> = [
     {
@@ -34,36 +34,28 @@ export default function WabelCard() {
       dataIndex: "date",
       key: "date",
     },
-    {
-      title: "状态",
-      align: "center",
-      dataIndex: "status",
-      key: "status",
-    },
-    {
-      title: "操作",
-      align: "center",
-      dataIndex: "action",
-      key: "action",
-      render() {
-        // return <div className="color-#65EC9B cursor-pointer">Completed</div>;
-        // return <div className="color-#FE675D cursor-pointer">Failed</div>;
-        //  <div
-        //     className="color-#FFD400 cursor-pointer"
-        //     onClick={() => setShow(true)}
-        //   >
-        //     Pending
-        //   </div>
-        return (
-          <div
-            className="color-#65EC9B cursor-pointer"
-            onClick={() => setShow(true)}
-          >
-            提现
-          </div>
-        );
-      },
-    },
+    // {
+    //   title: "状态",
+    //   align: "center",
+    //   dataIndex: "status",
+    //   key: "status",
+    // },
+    // {
+    //   title: "操作",
+    //   align: "center",
+    //   dataIndex: "action",
+    //   key: "action",
+    //   render() {
+    //     return (
+    //       <div
+    //         className="color-#65EC9B cursor-pointer"
+    //         onClick={() => setShow(true)}
+    //       >
+    //         提现
+    //       </div>
+    //     );
+    //   },
+    // },
   ];
   const handleGetList = async () => {
     contractWebl.current = await getContractInstance(
@@ -72,7 +64,18 @@ export default function WabelCard() {
       wablABI.abi
     );
     const data = await contractWebl.current?.lockedDetail(address);
-    console.log("data", JSON.stringify(data));
+    console.log("dd", data);
+    setList(
+      data.map((item: [bigint, bigint]) => {
+        console.log("item[0]", item[0]);
+        const t = Number(item[0].toString()) * 1000;
+        console.log("t", t);
+        return {
+          amount: formatEther(item[1]),
+          date: dayjs(t).format("YYYY/MM/DD HH:mm:ss"),
+        };
+      })
+    );
   };
 
   useEffect(() => {
@@ -83,7 +86,7 @@ export default function WabelCard() {
   }, [address, isConnected]);
   return (
     <div>
-      <Table dataSource={list} columns={columns}></Table>
+      <Table dataSource={list} columns={columns} pagination={false}></Table>
       <Modal
         open={show}
         title="Transaction detail"

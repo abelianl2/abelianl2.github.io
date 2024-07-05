@@ -1,5 +1,5 @@
 import CardBG from "./CardBG";
-import ToStakeCard from "./ToStakeCard";
+// import ToStakeCard from "./ToStakeCard";
 import TotalCard from "./TotalCard";
 import VeQDayCard from "./VeQDayCard";
 import WabelCard from "./WabelCard";
@@ -7,19 +7,19 @@ import WabelCard from "./WabelCard";
 export default function QdayStaking() {
   return (
     <div className="page-abelstaking">
-      <div className="flex flex-col gap-14px">
-        <CardBG>
+      <div className="flex flex-col gap-24px">
+        <CardBG title="汇总">
           <TotalCard />
         </CardBG>
-        <div className="mt-30px">
+        {/* <div className="mt-30px">
           <ToStakeCard />
-        </div>
-        <CardBG>
+        </div> */}
+        <CardBG title="VeQDay">
           <VeQDayCard />
         </CardBG>
-        <div className="mt-30px">
+        <CardBG title="WAbel">
           <WabelCard />
-        </div>
+        </CardBG>
       </div>
     </div>
   );

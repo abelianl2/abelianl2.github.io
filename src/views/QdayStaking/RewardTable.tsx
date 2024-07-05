@@ -35,14 +35,6 @@ export default function RewardTable() {
       dataIndex: "action",
       key: "action",
       render() {
-        // return <div className="color-#65EC9B cursor-pointer">Completed</div>;
-        // return <div className="color-#FE675D cursor-pointer">Failed</div>;
-        //  <div
-        //     className="color-#FFD400 cursor-pointer"
-        //     onClick={() => setShow(true)}
-        //   >
-        //     Pending
-        //   </div>
         return (
           <div
             className="color-#65EC9B cursor-pointer"

@@ -9,13 +9,17 @@ import {
 import { JsonRpcProvider, ethers, formatEther } from "ethers";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { toFixed } from "../../utils/utils";
-import { Button } from "antd";
+import { Button, message } from "antd";
 import qdayCoreABI from "../../assets/json/QdayCore.json";
 import veyABI from "../../assets/json/VeQday.json";
 import wablABI from "../../assets/json/WAbl.json";
 import { eventBus } from "../../events/events";
+import { useWriteContract } from "wagmi";
 export default function TotalCard() {
   const [balance, setBalance] = useState("0");
+  const [unlockload, setUnlockLoad] = useState(false);
+  const [withDrawload, setWithDrawLoad] = useState(false);
+  const [messageApi, messageContext] = message.useMessage();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const provider = new JsonRpcProvider(RPC_URL);
   const contractCore = useRef<ethers.Contract>();
@@ -76,6 +80,17 @@ export default function TotalCard() {
     handleGetData();
   };
 
+  const {
+    data: hash,
+    writeContract: writeUnlock,
+    error: unLockErr,
+  } = useWriteContract();
+  const {
+    data: hash2,
+    writeContract: writeWithdraw,
+    error: withDrawErr,
+  } = useWriteContract();
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleGetBalance = async () => {
     if (address) {
@@ -95,6 +110,58 @@ export default function TotalCard() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, isConnected]);
+  // 解锁
+  const handleUnlock = () => {
+    setUnlockLoad(true);
+    writeUnlock({
+      abi: wablABI.abi,
+      address: wabelContract,
+      args: [address],
+      functionName: "unlock",
+    });
+  };
+
+  // 体现
+  const handleWithDraw = () => {
+    setWithDrawLoad(true);
+    writeWithdraw({
+      abi: qdayCoreABI.abi,
+      address: qdayContract,
+      args: [address],
+      functionName: "withdrawReward",
+    });
+  };
+  const handleLoadReceipt = async (hash: string, type: string = "交易") => {
+    messageApi.open({
+      duration: 0,
+      type: "loading",
+      content: `${type}中请稍后...`,
+    });
+    const receipt = await provider.waitForTransaction(hash);
+    messageApi.destroy();
+    if (receipt?.status) {
+      messageApi.success(`${type}成功`);
+    } else {
+      messageApi.error(`${type}失败`);
+    }
+  };
+  useEffect(() => {
+    if (hash) {
+      handleLoadReceipt(hash, "解锁").finally(() => setUnlockLoad(false));
+    }
+    if (hash2) {
+      handleLoadReceipt(hash2, "提现").finally(() => setWithDrawLoad(false));
+    }
+    if (unLockErr) {
+      messageApi.error(unLockErr.message);
+      setUnlockLoad(false);
+    }
+    if (withDrawErr) {
+      messageApi.error(withDrawErr.message);
+      setWithDrawLoad(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hash, hash2, withDrawErr, unLockErr]);
 
   useEffect(() => {
     eventBus.on("updateEvent", () => {
@@ -106,6 +173,7 @@ export default function TotalCard() {
   });
   return (
     <div className="flex  h-120px font-size-12px gap-10px">
+      {messageContext}
       <div className="flex-1 w-25% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>全网质押veQday</div>
@@ -115,7 +183,12 @@ export default function TotalCard() {
           <div>我的锁仓wAbel</div>
           <div>
             {mywabel}QDAY{" "}
-            <Button type="primary" className="h-24px">
+            <Button
+              type="primary"
+              className="h-24px ml-20px"
+              loading={unlockload}
+              onClick={handleUnlock}
+            >
               解锁wAbel
             </Button>
           </div>
@@ -132,7 +205,12 @@ export default function TotalCard() {
           <div>待提现奖金</div>
           <div>
             {unLockReward}QDAY{" "}
-            <Button type="primary" className="h-24px">
+            <Button
+              type="primary"
+              className="h-24px  ml-20px"
+              loading={withDrawload}
+              onClick={handleWithDraw}
+            >
               提现奖励
             </Button>
           </div>
