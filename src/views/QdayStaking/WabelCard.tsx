@@ -2,14 +2,11 @@ import { Table, TableColumnsType, Modal, Button } from "antd";
 import { useEffect, useRef, useState } from "react";
 import success from "../../assets/success.svg";
 import dayjs from "dayjs";
-import {
-  RPC_URL,
-  getContractInstance,
-  wabelContract,
-} from "../../utils/web3Modal";
+import { RPC_URL, getContractInstance } from "../../utils/web3Modal";
 import { JsonRpcProvider, ethers, formatEther } from "ethers";
 import wablABI from "../../assets/json/WAbl.json";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
+import { wabelContract } from "../../const/enum";
 export type RewardListItem = {
   amount: string;
   date: string;
@@ -57,6 +54,7 @@ export default function WabelCard() {
     //   },
     // },
   ];
+  // 获取列表数据
   const handleGetList = async () => {
     contractWebl.current = await getContractInstance(
       provider,

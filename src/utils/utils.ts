@@ -52,3 +52,7 @@ export function toFixed(val: string | number, FIXED_LEN = 4) {
   const intMuVal = Number(muVal);
   return Math.floor(Number(val) * intMuVal) / intMuVal;
 }
+
+export const getMsgKey = () => {
+  return "updatableMsg" + new Date().getTime();
+};

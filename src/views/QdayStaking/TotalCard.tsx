@@ -1,24 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  RPC_URL,
-  getContractInstance,
-  coreContract,
-  veContract,
-  wabelContract,
-} from "../../utils/web3Modal";
+import { RPC_URL, getContractInstance } from "../../utils/web3Modal";
 import { JsonRpcProvider, ethers, formatEther } from "ethers";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
-import { toFixed } from "../../utils/utils";
+import { getMsgKey, toFixed } from "../../utils/utils";
 import { Button, message } from "antd";
 import qdayCoreABI from "../../assets/json/QdayCore.json";
 import veyABI from "../../assets/json/VeQday.json";
 import wablABI from "../../assets/json/WAbl.json";
 import { eventBus } from "../../events/events";
-import { useWriteContract } from "wagmi";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { coreContract, veContract, wabelContract } from "../../const/enum";
 export default function TotalCard() {
   const [balance, setBalance] = useState("0");
-  const [unlockload, setUnlockLoad] = useState(false);
-  const [withDrawload, setWithDrawLoad] = useState(false);
   const [messageApi, messageContext] = message.useMessage();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const provider = new JsonRpcProvider(RPC_URL);
@@ -75,6 +68,7 @@ export default function TotalCard() {
         coreContract,
         qdayCoreABI.abi
       );
+
       contractVe.current = await getContractInstance(
         provider,
         veContract,
@@ -93,13 +87,22 @@ export default function TotalCard() {
     data: hash,
     writeContract: writeUnlock,
     error: unLockErr,
+    isPending: unLockPending,
   } = useWriteContract();
   const {
     data: hash2,
     writeContract: writeWithdraw,
     error: withDrawErr,
+    isPending: withdrawPending,
   } = useWriteContract();
-
+  const { isSuccess: unLockConfirmed, isLoading: unLoading } =
+    useWaitForTransactionReceipt({
+      hash,
+    });
+  const { isSuccess: withdrawConfirmed, isLoading: WithdrawLoading } =
+    useWaitForTransactionReceipt({
+      hash: hash2,
+    });
   const handleGetBalance = async () => {
     if (address) {
       const b = await provider.getBalance(address);
@@ -120,7 +123,6 @@ export default function TotalCard() {
   }, [address, isConnected]);
   // 解锁
   const handleUnlock = () => {
-    setUnlockLoad(true);
     writeUnlock({
       abi: wablABI.abi,
       address: wabelContract,
@@ -131,7 +133,6 @@ export default function TotalCard() {
 
   // 提现
   const handleWithDraw = () => {
-    setWithDrawLoad(true);
     writeWithdraw({
       abi: qdayCoreABI.abi,
       address: coreContract,
@@ -139,47 +140,66 @@ export default function TotalCard() {
       functionName: "withdrawReward",
     });
   };
-  const MessageKey = "updatableMsg";
-  const handleLoadReceipt = async (hash: string, type: string = "交易") => {
+  const handleShowLoading = (type: string, key: string) => {
     messageApi.open({
       duration: 0,
       type: "loading",
       content: `${type}中请稍后...`,
-      key: MessageKey,
+      key,
     });
-    const receipt = await provider.waitForTransaction(hash);
-    if (receipt?.status) {
-      messageApi.open({
-        content: `${type}成功`,
-        type: "success",
-        key: MessageKey,
-      });
-      eventBus.emit("updateEvent");
-    } else {
-      messageApi.open({
-        content: `${type}失败`,
-        type: "error",
-        key: MessageKey,
-      });
-    }
-    setUnlockLoad(false);
-    setWithDrawLoad(false);
   };
+  const handleShowSuccess = (type: string, key: string) => {
+    messageApi.destroy();
+    messageApi.open({
+      content: `${type}成功`,
+      type: "success",
+      key,
+      duration: 3,
+    });
+  };
+  // const handleShowFailed = (type: string, key: string) => {
+  //   messageApi.destroy();
+  //   messageApi.open({
+  //     content: `${type}失败`,
+  //     type: "error",
+  //     key,
+  //     duration: 3,
+  //   });
+  //   eventBus.emit("updateEvent");
+  // };
+
   useEffect(() => {
-    if (hash) {
-      handleLoadReceipt(hash, "解锁").then(() => handleUpdate());
+    if (unLoading || unLockConfirmed) {
+      const key = getMsgKey();
+      if (unLoading) {
+        handleShowLoading("解锁", key);
+      }
+      if (unLockConfirmed) {
+        handleShowSuccess("解锁", key);
+      }
     }
-    if (hash2) {
-      handleLoadReceipt(hash2, "提现").then(() => handleUpdate());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unLockConfirmed, unLoading]);
+
+  useEffect(() => {
+    if (WithdrawLoading || withdrawConfirmed) {
+      const key = getMsgKey();
+      if (WithdrawLoading) {
+        handleShowLoading("提现", key);
+      }
+      if (unLockConfirmed) {
+        handleShowSuccess("提现", key);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [withdrawConfirmed, WithdrawLoading]);
+  useEffect(() => {
     if (unLockErr || withDrawErr) {
       const msg = unLockErr || withDrawErr;
       messageApi.error(msg?.message);
-      setUnlockLoad(false);
-      setWithDrawLoad(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hash, hash2, withDrawErr, unLockErr]);
+  }, [withDrawErr, unLockErr]);
 
   useEffect(() => {
     eventBus.on("updateEvent", () => {
@@ -189,6 +209,7 @@ export default function TotalCard() {
       eventBus.off("updateEvent", handleInitContract);
     };
   });
+
   return (
     <div className="flex  h-120px font-size-12px gap-10px">
       {messageContext}
@@ -204,7 +225,7 @@ export default function TotalCard() {
             <Button
               type="primary"
               className="h-24px ml-20px"
-              loading={unlockload}
+              loading={unLockPending}
               onClick={handleUnlock}
             >
               解锁wAbel
@@ -226,7 +247,7 @@ export default function TotalCard() {
             <Button
               type="primary"
               className="h-24px  ml-20px"
-              loading={withDrawload}
+              loading={withdrawPending}
               onClick={handleWithDraw}
             >
               提现奖励

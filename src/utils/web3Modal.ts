@@ -2,10 +2,6 @@ import { Web3Modal } from "@web3modal/ethers";
 import { createWeb3Modal, defaultConfig } from "@web3modal/ethers/react";
 import { ethers } from "ethers";
 
-// 合约地址
-export const coreContract = "0xa0FC8C387d50C4c2131dF140984d6A9E32e7F570";
-export const wabelContract = "0x69A986a954dee0178D9A01c8B07c9B3a036ce5Aa";
-export const veContract = "0x0bEf7d8403E24c245158A088bb94CC2940B2DFa1";
 // 项目id 通过 walletConnect cloud创建
 export const projectId = "fcecdc049765b0a170b43b92bba0ccf3";
 
