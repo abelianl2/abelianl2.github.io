@@ -32,30 +32,27 @@ export default function TotalCard() {
     try {
       console.warn("type", contractCore.current);
       const res: bigint = await contractCore.current?.totalStake();
-      setTotalStake(toFixed(formatEther(res ? res.toString() : "0")) + "");
+      setTotalStake(formatEther(res ? res.toString() : "0"));
       const res2 = await contractCore.current?.userStake(address);
 
-      setUserStakeVal(toFixed(formatEther(res2 ? res2.toString() : "0")) + "");
+      setUserStakeVal(formatEther(res2 ? res2.toString() : "0"));
       const totReward = await contractCore.current?.totalReward();
-      setTotalReward(
-        toFixed(formatEther(totReward ? totReward.toString() : "0")) + ""
-      );
+      setTotalReward(formatEther(totReward ? totReward.toString() : "0"));
       const mReward = await contractCore.current?.claimedReward(address);
-      setMyReward(
-        toFixed(formatEther(mReward ? mReward.toString() : "0")) + ""
-      );
+      setMyReward(formatEther(mReward ? mReward.toString() : "0"));
       const res6 = await contractCore.current?.unlockedReward(address);
-      setUnLockReward(toFixed(formatEther(res6 ? res6.toString() : "0")) + "");
+      setUnLockReward(formatEther(res6 ? res6.toString() : "0"));
       const res5 = await contractWebl.current?.lockedBalance(address);
-      setmywabel(toFixed(formatEther(res5 ? res5.toString() : "0")) + "");
+      setmywabel(formatEther(res5 ? res5.toString() : "0"));
       // 查询我的WEBAL
       const res7 = await contractWebl.current?.balanceOf(address);
-      setMywabelBalance(
-        toFixed(formatEther(res7 ? res7.toString() : "0")) + ""
-      );
+      console.log("res7", res7.toString());
+      setMywabelBalance(formatEther(res7 ? res7.toString() : "0"));
       // 查询我的veQday
       const res8 = await contractVe.current?.balanceOf(address);
-      setMyqdayBalance(toFixed(formatEther(res8 ? res8.toString() : "0")) + "");
+      console.log("res8", res8.toString());
+
+      setMyqdayBalance(formatEther(res8 ? res8.toString() : "0"));
     } catch (err) {
       console.error("err", err);
     }
@@ -156,17 +153,8 @@ export default function TotalCard() {
       key,
       duration: 3,
     });
+    handleUpdate();
   };
-  // const handleShowFailed = (type: string, key: string) => {
-  //   messageApi.destroy();
-  //   messageApi.open({
-  //     content: `${type}失败`,
-  //     type: "error",
-  //     key,
-  //     duration: 3,
-  //   });
-  //   eventBus.emit("updateEvent");
-  // };
 
   useEffect(() => {
     if (unLoading || unLockConfirmed) {
@@ -202,11 +190,9 @@ export default function TotalCard() {
   }, [withDrawErr, unLockErr]);
 
   useEffect(() => {
-    eventBus.on("updateEvent", () => {
-      handleUpdate();
-    });
+    eventBus.on("updateEvent", handleUpdate);
     return () => {
-      eventBus.off("updateEvent", handleInitContract);
+      eventBus.off("updateEvent", handleUpdate);
     };
   });
 
@@ -221,10 +207,11 @@ export default function TotalCard() {
         <div className="flex flex-col justify-between">
           <div>我的锁仓wAbel</div>
           <div>
-            {mywabel}QDAY{" "}
+            {toFixed(mywabel, 6)}QDAY{" "}
             <Button
               type="primary"
               className="h-24px ml-20px"
+              disabled={Number(mywabel) <= 0 ? true : false}
               loading={unLockPending}
               onClick={handleUnlock}
             >
@@ -237,17 +224,18 @@ export default function TotalCard() {
       <div className="flex-1 w-20% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>我的质押veQday</div>
-          <div>{userStakeVal}QDAY</div>
+          <div>{toFixed(userStakeVal, 6)}QDAY</div>
         </div>
 
         <div className="flex flex-col justify-between">
           <div>待提现奖金</div>
           <div>
-            {unLockReward}QDAY{" "}
+            {toFixed(unLockReward, 6)}QDAY{" "}
             <Button
               type="primary"
               className="h-24px  ml-20px"
               loading={withdrawPending}
+              disabled={Number(unLockReward) <= 0 ? true : false}
               onClick={handleWithDraw}
             >
               提现奖励
@@ -259,28 +247,28 @@ export default function TotalCard() {
       <div className="flex-1 w-20% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>我的wAbel</div>
-          <div>{mywabelBalance}QDAY</div>
+          <div>{toFixed(mywabelBalance, 6)}QDAY</div>
         </div>
         <div className="flex flex-col justify-between">
           <div>我的veQday</div>
-          <div>{myqdayBalance}QDAY</div>
+          <div>{toFixed(myqdayBalance, 6)}QDAY</div>
         </div>
       </div>
 
       <div className="flex-1 w-20% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>我的收益</div>
-          <div>{myReward}QDAY</div>
+          <div>{toFixed(myReward, 6)}QDAY</div>
         </div>
         <div className="flex flex-col justify-between">
           <div>全网总收益</div>
-          <div>{totalReward}QDAY</div>
+          <div>{toFixed(totalReward, 6)}QDAY</div>
         </div>
       </div>
       <div className="flex-1 w-20% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>我的余额</div>
-          <div>{balance} QDAY</div>
+          <div>{toFixed(balance, 6)} QDAY</div>
         </div>
       </div>
     </div>
