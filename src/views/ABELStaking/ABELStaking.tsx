@@ -4,30 +4,31 @@ import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { submitWithMemo } from "../../api/modules/staking";
 import { lockUpPeriod } from "../../const/enum";
+import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 export default function ABELStaking() {
   const [form] = Form.useForm();
   // const navigator = useNavigate();
   // const handleBack = () => {
   //   navigator("/QdayStaking");
   // };
+  const { address } = useWeb3ModalAccount();
+
   const [loading, setLoading] = useState(false);
   const [code, setCode] = useState("");
   const handleSubmit = async () => {
     try {
       const formData = await form.validateFields({ validateOnly: true });
-      try {
-        setLoading(true);
-        const data = await submitWithMemo({
-          ...formData,
-          lockupPeriod: formData.lockupPeriod,
-        });
-        setCode(data.redirect);
-        form.resetFields();
-      } finally {
-        setLoading(false);
-      }
+      setLoading(true);
+      const data = await submitWithMemo({
+        ...formData,
+        lockupPeriod: formData.lockupPeriod,
+      });
+      setCode(JSON.stringify(data));
+      form.resetFields();
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -46,9 +47,10 @@ export default function ABELStaking() {
                 <Form.Item
                   label="From Network"
                   name="from_network"
-                  rules={[{ required: true }]}
+                  rules={[{ required: false }]}
+                  initialValue="Abelian Testnetwork"
                 >
-                  <Input placeholder="input placeholder" />
+                  <Input readOnly placeholder="input placeholder" />
                 </Form.Item>
                 <Form.Item
                   name="from_address"
@@ -66,14 +68,16 @@ export default function ABELStaking() {
                 <Form.Item
                   name="to_network"
                   label="To Network"
-                  rules={[{ required: true }]}
+                  initialValue="Qday Testnetwork"
+                  rules={[{ required: false }]}
                 >
-                  <Input placeholder="Input To Network" />
+                  <Input placeholder="Input To Network" readOnly />
                 </Form.Item>
                 <Form.Item
                   name="to_address"
                   label="To Address"
                   rules={[{ required: true }]}
+                  initialValue={address}
                 >
                   <Input placeholder="Enter address" />
                 </Form.Item>

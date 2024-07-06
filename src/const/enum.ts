@@ -1,4 +1,6 @@
 export const isProd = import.meta.env.VITE_ENV === "prod";
+export const isTest = import.meta.env.VITE_ENV === "test";
+export const isDev = import.meta.env.VITE_ENV === "dev";
 const lockUpPeriod_prod = [
   { value: 180, label: "6 Month", ratio: 1 },
   { value: 270, label: "9 Month", ratio: 2 },
@@ -12,3 +14,7 @@ const lockUpPeriod_dev = [
 ];
 
 export const lockUpPeriod = isProd ? lockUpPeriod_prod : lockUpPeriod_dev;
+
+export const coreContract = import.meta.env.VITE_QDAYCORE;
+export const wabelContract = import.meta.env.VITE_WABEL;
+export const veContract = import.meta.env.VITE_VEQDAY;

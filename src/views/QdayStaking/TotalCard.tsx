@@ -1,24 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  RPC_URL,
-  getContractInstance,
-  qdayContract,
-  veContract,
-  wabelContract,
-} from "../../utils/web3Modal";
+import { RPC_URL, getContractInstance } from "../../utils/web3Modal";
 import { JsonRpcProvider, ethers, formatEther } from "ethers";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
-import { toFixed } from "../../utils/utils";
+import { getMsgKey, toFixed } from "../../utils/utils";
 import { Button, message } from "antd";
 import qdayCoreABI from "../../assets/json/QdayCore.json";
 import veyABI from "../../assets/json/VeQday.json";
 import wablABI from "../../assets/json/WAbl.json";
 import { eventBus } from "../../events/events";
-import { useWriteContract } from "wagmi";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { coreContract, veContract, wabelContract } from "../../const/enum";
 export default function TotalCard() {
   const [balance, setBalance] = useState("0");
-  const [unlockload, setUnlockLoad] = useState(false);
-  const [withDrawload, setWithDrawLoad] = useState(false);
   const [messageApi, messageContext] = message.useMessage();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const provider = new JsonRpcProvider(RPC_URL);
@@ -32,28 +25,34 @@ export default function TotalCard() {
   const [unLockReward, setUnLockReward] = useState("0");
   const [totalReward, setTotalReward] = useState("0");
   const [myReward, setMyReward] = useState("0");
+  const [mywabelBalance, setMywabelBalance] = useState("0");
+  const [myqdayBalance, setMyqdayBalance] = useState("0");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleGetData = async () => {
     try {
       console.warn("type", contractCore.current);
       const res: bigint = await contractCore.current?.totalStake();
-      setTotalStake(toFixed(formatEther(res ? res.toString() : "0")) + "");
+      setTotalStake(formatEther(res ? res.toString() : "0"));
       const res2 = await contractCore.current?.userStake(address);
 
-      setUserStakeVal(toFixed(formatEther(res2 ? res2.toString() : "0")) + "");
+      setUserStakeVal(formatEther(res2 ? res2.toString() : "0"));
       const totReward = await contractCore.current?.totalReward();
-      setTotalReward(
-        toFixed(formatEther(totReward ? totReward.toString() : "0")) + ""
-      );
+      setTotalReward(formatEther(totReward ? totReward.toString() : "0"));
       const mReward = await contractCore.current?.claimedReward(address);
-      setMyReward(
-        toFixed(formatEther(mReward ? mReward.toString() : "0")) + ""
-      );
+      setMyReward(formatEther(mReward ? mReward.toString() : "0"));
       const res6 = await contractCore.current?.unlockedReward(address);
-      setUnLockReward(toFixed(formatEther(res6 ? res6.toString() : "0")) + "");
-      // 查询我的WEBAL
+      setUnLockReward(formatEther(res6 ? res6.toString() : "0"));
       const res5 = await contractWebl.current?.lockedBalance(address);
-      setmywabel(toFixed(formatEther(res5 ? res5.toString() : "0")) + "");
+      setmywabel(formatEther(res5 ? res5.toString() : "0"));
+      // 查询我的WEBAL
+      const res7 = await contractWebl.current?.balanceOf(address);
+      console.log("res7", res7.toString());
+      setMywabelBalance(formatEther(res7 ? res7.toString() : "0"));
+      // 查询我的veQday
+      const res8 = await contractVe.current?.balanceOf(address);
+      console.log("res8", res8.toString());
+
+      setMyqdayBalance(formatEther(res8 ? res8.toString() : "0"));
     } catch (err) {
       console.error("err", err);
     }
@@ -63,9 +62,10 @@ export default function TotalCard() {
     if (!contractCore.current || !contractVe.current || contractWebl.current) {
       contractCore.current = await getContractInstance(
         provider,
-        qdayContract,
+        coreContract,
         qdayCoreABI.abi
       );
+
       contractVe.current = await getContractInstance(
         provider,
         veContract,
@@ -84,14 +84,22 @@ export default function TotalCard() {
     data: hash,
     writeContract: writeUnlock,
     error: unLockErr,
+    isPending: unLockPending,
   } = useWriteContract();
   const {
     data: hash2,
     writeContract: writeWithdraw,
     error: withDrawErr,
+    isPending: withdrawPending,
   } = useWriteContract();
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const { isSuccess: unLockConfirmed, isLoading: unLoading } =
+    useWaitForTransactionReceipt({
+      hash,
+    });
+  const { isSuccess: withdrawConfirmed, isLoading: WithdrawLoading } =
+    useWaitForTransactionReceipt({
+      hash: hash2,
+    });
   const handleGetBalance = async () => {
     if (address) {
       const b = await provider.getBalance(address);
@@ -99,7 +107,7 @@ export default function TotalCard() {
       setBalance(toFixed(bs) + "");
     }
   };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   const handleUpdate = () => {
     handleGetBalance();
     handleInitContract();
@@ -112,7 +120,6 @@ export default function TotalCard() {
   }, [address, isConnected]);
   // 解锁
   const handleUnlock = () => {
-    setUnlockLoad(true);
     writeUnlock({
       abi: wablABI.abi,
       address: wabelContract,
@@ -121,60 +128,78 @@ export default function TotalCard() {
     });
   };
 
-  // 体现
+  // 提现
   const handleWithDraw = () => {
-    setWithDrawLoad(true);
     writeWithdraw({
       abi: qdayCoreABI.abi,
-      address: qdayContract,
+      address: coreContract,
       args: [address],
       functionName: "withdrawReward",
     });
   };
-  const handleLoadReceipt = async (hash: string, type: string = "交易") => {
+  const handleShowLoading = (type: string, key: string) => {
     messageApi.open({
       duration: 0,
       type: "loading",
       content: `${type}中请稍后...`,
+      key,
     });
-    const receipt = await provider.waitForTransaction(hash);
-    messageApi.destroy();
-    if (receipt?.status) {
-      messageApi.success(`${type}成功`);
-    } else {
-      messageApi.error(`${type}失败`);
-    }
   };
-  useEffect(() => {
-    if (hash) {
-      handleLoadReceipt(hash, "解锁").finally(() => setUnlockLoad(false));
-    }
-    if (hash2) {
-      handleLoadReceipt(hash2, "提现").finally(() => setWithDrawLoad(false));
-    }
-    if (unLockErr) {
-      messageApi.error(unLockErr.message);
-      setUnlockLoad(false);
-    }
-    if (withDrawErr) {
-      messageApi.error(withDrawErr.message);
-      setWithDrawLoad(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hash, hash2, withDrawErr, unLockErr]);
+  const handleShowSuccess = (type: string, key: string) => {
+    messageApi.destroy();
+    messageApi.open({
+      content: `${type}成功`,
+      type: "success",
+      key,
+      duration: 3,
+    });
+    handleUpdate();
+  };
 
   useEffect(() => {
-    eventBus.on("updateEvent", () => {
-      handleUpdate();
-    });
+    if (unLoading || unLockConfirmed) {
+      const key = getMsgKey();
+      if (unLoading) {
+        handleShowLoading("解锁", key);
+      }
+      if (unLockConfirmed) {
+        handleShowSuccess("解锁", key);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unLockConfirmed, unLoading]);
+
+  useEffect(() => {
+    if (WithdrawLoading || withdrawConfirmed) {
+      const key = getMsgKey();
+      if (WithdrawLoading) {
+        handleShowLoading("提现", key);
+      }
+      if (unLockConfirmed) {
+        handleShowSuccess("提现", key);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [withdrawConfirmed, WithdrawLoading]);
+  useEffect(() => {
+    if (unLockErr || withDrawErr) {
+      const msg = unLockErr || withDrawErr;
+      messageApi.error(msg?.message);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [withDrawErr, unLockErr]);
+
+  useEffect(() => {
+    eventBus.on("updateEvent", handleUpdate);
     return () => {
-      eventBus.off("updateEvent", handleInitContract);
+      eventBus.off("updateEvent", handleUpdate);
     };
   });
+
   return (
     <div className="flex  h-120px font-size-12px gap-10px">
       {messageContext}
-      <div className="flex-1 w-25% h-100% flex flex-col justify-between">
+      <div className="flex-1 w-20% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>全网质押veQday</div>
           <div>{totalStake}QDAY</div>
@@ -182,11 +207,12 @@ export default function TotalCard() {
         <div className="flex flex-col justify-between">
           <div>我的锁仓wAbel</div>
           <div>
-            {mywabel}QDAY{" "}
+            {toFixed(mywabel, 6)}QDAY{" "}
             <Button
               type="primary"
               className="h-24px ml-20px"
-              loading={unlockload}
+              disabled={Number(mywabel) <= 0 ? true : false}
+              loading={unLockPending}
               onClick={handleUnlock}
             >
               解锁wAbel
@@ -195,20 +221,21 @@ export default function TotalCard() {
         </div>
       </div>
 
-      <div className="flex-1 w-25% h-100% flex flex-col justify-between">
+      <div className="flex-1 w-20% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>我的质押veQday</div>
-          <div>{userStakeVal}QDAY</div>
+          <div>{toFixed(userStakeVal, 6)}QDAY</div>
         </div>
 
         <div className="flex flex-col justify-between">
           <div>待提现奖金</div>
           <div>
-            {unLockReward}QDAY{" "}
+            {toFixed(unLockReward, 6)}QDAY{" "}
             <Button
               type="primary"
               className="h-24px  ml-20px"
-              loading={withDrawload}
+              loading={withdrawPending}
+              disabled={Number(unLockReward) <= 0 ? true : false}
               onClick={handleWithDraw}
             >
               提现奖励
@@ -217,20 +244,31 @@ export default function TotalCard() {
         </div>
       </div>
 
-      <div className="flex-1 w-25% h-100% flex flex-col justify-between">
+      <div className="flex-1 w-20% h-100% flex flex-col justify-between">
+        <div className="flex flex-col justify-between">
+          <div>我的wAbel</div>
+          <div>{toFixed(mywabelBalance, 6)}QDAY</div>
+        </div>
+        <div className="flex flex-col justify-between">
+          <div>我的veQday</div>
+          <div>{toFixed(myqdayBalance, 6)}QDAY</div>
+        </div>
+      </div>
+
+      <div className="flex-1 w-20% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>我的收益</div>
-          <div>{myReward}QDAY</div>
+          <div>{toFixed(myReward, 6)}QDAY</div>
         </div>
         <div className="flex flex-col justify-between">
           <div>全网总收益</div>
-          <div>{totalReward}QDAY</div>
+          <div>{toFixed(totalReward, 6)}QDAY</div>
         </div>
       </div>
-      <div className="flex-1 w-25% h-100% flex flex-col justify-between">
+      <div className="flex-1 w-20% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>我的余额</div>
-          <div>{balance} QDAY</div>
+          <div>{toFixed(balance, 6)} QDAY</div>
         </div>
       </div>
     </div>

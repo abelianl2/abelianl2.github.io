@@ -19,6 +19,11 @@ input {
   margin-bottom: 14px;
 }
 
+.ant-btn-primary:disabled,
+.ant-btn-primary.ant-btn-disabled {
+
+  background: #ccc;
+}
 
 .ant-select {
   height: 44px !important;
