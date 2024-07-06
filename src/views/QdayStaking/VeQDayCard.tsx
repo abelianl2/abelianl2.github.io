@@ -1,20 +1,30 @@
 import { Input, Button, message } from "antd";
 import { useWriteContract } from "wagmi";
-import { RPC_URL, qdayContract } from "../../utils/web3Modal";
+import {
+  RPC_URL,
+  coreContract,
+  getContractInstance,
+  veContract,
+} from "../../utils/web3Modal";
 import QDayABI from "../../assets/json/QdayCore.json";
-// import VeQDayABI from "../../assets/json/VeQday.json";
-import { parseEther } from "ethers";
-import { useEffect, useState } from "react";
+import VeQDayABI from "../../assets/json/VeQday.json";
+import { ethers, parseEther } from "ethers";
+import { useEffect, useRef, useState } from "react";
 import { eventBus } from "../../events/events";
 import { JsonRpcProvider } from "ethers";
+import { Contract } from "ethers";
+import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 
 export default function VeQDayCard() {
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
   const [loading4, setLoading4] = useState(false);
+
   const provider = new JsonRpcProvider(RPC_URL);
-  // const [, setLoading5] = useState(false);
-  // const [loading6, setLoading6] = useState(false);
+  const veqdayContractIns = useRef<Contract>();
+  const { address, isConnected } = useWeb3ModalAccount();
+  const [loading5, setLoading5] = useState(false);
+  const [loading6, setLoading6] = useState(false);
   const [messageApi, MessageContext] = message.useMessage();
   const {
     data: hash,
@@ -26,10 +36,16 @@ export default function VeQDayCard() {
     writeContract: writeQdayContract,
     error: qDayErr,
   } = useWriteContract();
-  // const { data: hash4, writeContract: writeDepositContract } =
-  //   useWriteContract();
-  // const { data: hash5, writeContract: writeArrroveContract } =
-  //   useWriteContract();
+  const {
+    data: hash4,
+    writeContract: writeDepositContract,
+    error: depositErr,
+  } = useWriteContract();
+  const {
+    data: hash5,
+    writeContract: writeArrroveContract,
+    error: approveErr,
+  } = useWriteContract();
   const {
     data: hash6,
     writeContract: writeUnstakeContract,
@@ -39,7 +55,8 @@ export default function VeQDayCard() {
   const [val, setVal] = useState("");
   const [val1, setVal1] = useState("");
   const [val2, setVal2] = useState("");
-  // const [val3, setVal3] = useState("");
+  const [isApprove, setIsApprove] = useState(false);
+  const [val3, setVal3] = useState("");
   const handleVeStake = () => {
     if (!val) {
       return;
@@ -47,21 +64,25 @@ export default function VeQDayCard() {
     setLoading(true);
     // VEQday 质押
     writeVeQdayContract({
-      address: qdayContract,
+      address: coreContract,
       abi: QDayABI.abi,
       functionName: "stake",
       args: [parseEther(val)],
     });
   };
   // 兑换 VeQday
-  // const handleDesposit = () => {
-  //   writeDepositContract({
-  //     address: veContract,
-  //     abi: VeQDayABI.abi,
-  //     functionName: "deposit",
-  //     value: parseEther(val3),
-  //   });
-  // };
+  const handleDesposit = () => {
+    if (!val3) {
+      return;
+    }
+    setLoading6(true);
+    writeDepositContract({
+      address: veContract,
+      abi: VeQDayABI.abi,
+      functionName: "deposit",
+      value: parseEther(val3),
+    });
+  };
   // 质押Qday
   const handleQdayStake = () => {
     if (!val1) {
@@ -70,7 +91,7 @@ export default function VeQDayCard() {
     setLoading2(true);
 
     writeQdayContract({
-      address: qdayContract,
+      address: coreContract,
       abi: QDayABI.abi,
       functionName: "stakeWithQday",
       value: parseEther(val1),
@@ -83,59 +104,109 @@ export default function VeQDayCard() {
     }
     setLoading4(true);
     writeUnstakeContract({
-      address: qdayContract,
+      address: coreContract,
       abi: QDayABI.abi,
-      functionName: "unstake",
+      functionName: "unstakeWithQday",
       args: [parseEther(val2)],
     });
   };
+
+  const MessageKey = "updatableMsg";
   const handleLoadReceipt = async (hash: string, type: string = "交易") => {
     messageApi.open({
       duration: 0,
       type: "loading",
       content: `${type}中请稍后...`,
+      key: MessageKey,
     });
     const receipt = await provider.waitForTransaction(hash);
-    messageApi.destroy();
     if (receipt?.status) {
-      messageApi.success(`${type}成功`);
+      messageApi.open({
+        content: `${type}成功`,
+        type: "success",
+        key: MessageKey,
+      });
       eventBus.emit("updateEvent");
     } else {
-      messageApi.error(`${type}失败`);
+      messageApi.open({
+        content: `${type}失败`,
+        type: "error",
+        key: MessageKey,
+      });
     }
+    setLoading(false);
+    setLoading6(false);
+    setLoading2(false);
+    setLoading4(false);
+    setLoading5(false);
   };
   // 授权合约
-  // const handleApprove = () => {
-  //   writeArrroveContract({
-  //     address: veContract,
-  //     abi: VeQDayABI.abi,
-  //     functionName: "approve",
-  //     args: [qdayContract, ethers.MaxUint256],
-  //   });
-  // };
+  const handleApprove = () => {
+    setLoading5(true);
+    writeArrroveContract({
+      address: veContract,
+      abi: VeQDayABI.abi,
+      functionName: "approve",
+      args: [coreContract, ethers.MaxUint256],
+    });
+  };
   useEffect(() => {
-    hash &&
-      handleLoadReceipt(hash, "质押veQDay").finally(() => setLoading(false));
-    hash2 &&
-      handleLoadReceipt(hash2, "质押QDay").finally(() => setLoading2(false));
-    hash6 &&
-      handleLoadReceipt(hash6, "解除质押").finally(() => setLoading4(false));
-    if (unStakeErr) {
-      messageApi.error(unStakeErr.message);
-      setLoading4(false);
-    }
-    if (qDayErr) {
-      messageApi.error(qDayErr.message);
-      setLoading2(false);
-    }
-    if (veDayErr) {
-      messageApi.error(veDayErr.message);
+    hash && handleLoadReceipt(hash, "质押veQDay");
+    hash2 && handleLoadReceipt(hash2, "质押QDay");
+    hash6 && handleLoadReceipt(hash6, "解除质押");
+    hash5 &&
+      handleLoadReceipt(hash5, "授权").then(() => {
+        getIsApprove();
+      });
 
+    hash4 && handleLoadReceipt(hash4, "兑换VeQday");
+    if (unStakeErr || qDayErr || veDayErr || approveErr || depositErr) {
+      const msg = unStakeErr || qDayErr || veDayErr || approveErr || depositErr;
+      if (msg) {
+        messageApi.error(msg.message);
+      }
       setLoading(false);
+      setLoading6(false);
+      setLoading2(false);
+      setLoading4(false);
+      setLoading5(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hash, hash2, hash6, unStakeErr, qDayErr, veDayErr]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    hash,
+    hash2,
+    hash6,
+    hash4,
+    unStakeErr,
+    qDayErr,
+    veDayErr,
+    hash5,
+    approveErr,
+    depositErr,
+  ]);
+
+  const handleInitContract = async () => {
+    veqdayContractIns.current = await getContractInstance(
+      provider,
+      veContract,
+      VeQDayABI.abi
+    );
+    getIsApprove();
+  };
+  // 查询授权状态
+  const getIsApprove = async () => {
+    const v = await veqdayContractIns.current?.allowance(address, coreContract);
+    setIsApprove(Boolean(v));
+  };
+
+  useEffect(() => {
+    if (address && isConnected) {
+      handleInitContract();
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, isConnected]);
   return (
     <div>
       <div className="flex justify-between h-120px">
@@ -151,9 +222,23 @@ export default function VeQDayCard() {
               />
             </div>
             <div>
-              <Button type="primary" loading={loading} onClick={handleVeStake}>
-                veQDay质押
-              </Button>
+              {isApprove ? (
+                <Button
+                  type="primary"
+                  loading={loading}
+                  onClick={handleVeStake}
+                >
+                  veQDay质押
+                </Button>
+              ) : (
+                <Button
+                  type="primary"
+                  loading={loading5}
+                  onClick={handleApprove}
+                >
+                  授权
+                </Button>
+              )}
             </div>
           </div>
           <div className="flex items-center justify-between">
@@ -192,25 +277,25 @@ export default function VeQDayCard() {
               </Button>
             </div>
           </div>
-          {/* <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center justify-between">
+            <div className="w-60%">
               <Input
                 value={val3}
                 type="number"
                 onChange={(e) => setVal3(e.target.value)}
-                placeholder="请输入待质押QDay数量"
+                placeholder="请输入兑换VeQDay的数量"
               />
             </div>
             <div>
               <Button
                 type="primary"
-                loading={loading4}
+                loading={loading6}
                 onClick={handleDesposit}
               >
                 兑换 VeQday
               </Button>
             </div>
-          </div> */}
+          </div>
         </div>
       </div>
       {/* <div>

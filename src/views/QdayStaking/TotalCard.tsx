@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   RPC_URL,
   getContractInstance,
-  qdayContract,
+  coreContract,
   veContract,
   wabelContract,
 } from "../../utils/web3Modal";
@@ -32,6 +32,8 @@ export default function TotalCard() {
   const [unLockReward, setUnLockReward] = useState("0");
   const [totalReward, setTotalReward] = useState("0");
   const [myReward, setMyReward] = useState("0");
+  const [mywabelBalance, setMywabelBalance] = useState("0");
+  const [myqdayBalance, setMyqdayBalance] = useState("0");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleGetData = async () => {
     try {
@@ -51,9 +53,16 @@ export default function TotalCard() {
       );
       const res6 = await contractCore.current?.unlockedReward(address);
       setUnLockReward(toFixed(formatEther(res6 ? res6.toString() : "0")) + "");
-      // 查询我的WEBAL
       const res5 = await contractWebl.current?.lockedBalance(address);
       setmywabel(toFixed(formatEther(res5 ? res5.toString() : "0")) + "");
+      // 查询我的WEBAL
+      const res7 = await contractWebl.current?.balanceOf(address);
+      setMywabelBalance(
+        toFixed(formatEther(res7 ? res7.toString() : "0")) + ""
+      );
+      // 查询我的veQday
+      const res8 = await contractVe.current?.balanceOf(address);
+      setMyqdayBalance(toFixed(formatEther(res8 ? res8.toString() : "0")) + "");
     } catch (err) {
       console.error("err", err);
     }
@@ -63,7 +72,7 @@ export default function TotalCard() {
     if (!contractCore.current || !contractVe.current || contractWebl.current) {
       contractCore.current = await getContractInstance(
         provider,
-        qdayContract,
+        coreContract,
         qdayCoreABI.abi
       );
       contractVe.current = await getContractInstance(
@@ -91,7 +100,6 @@ export default function TotalCard() {
     error: withDrawErr,
   } = useWriteContract();
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleGetBalance = async () => {
     if (address) {
       const b = await provider.getBalance(address);
@@ -99,7 +107,7 @@ export default function TotalCard() {
       setBalance(toFixed(bs) + "");
     }
   };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   const handleUpdate = () => {
     handleGetBalance();
     handleInitContract();
@@ -121,43 +129,53 @@ export default function TotalCard() {
     });
   };
 
-  // 体现
+  // 提现
   const handleWithDraw = () => {
     setWithDrawLoad(true);
     writeWithdraw({
       abi: qdayCoreABI.abi,
-      address: qdayContract,
+      address: coreContract,
       args: [address],
       functionName: "withdrawReward",
     });
   };
+  const MessageKey = "updatableMsg";
   const handleLoadReceipt = async (hash: string, type: string = "交易") => {
     messageApi.open({
       duration: 0,
       type: "loading",
       content: `${type}中请稍后...`,
+      key: MessageKey,
     });
     const receipt = await provider.waitForTransaction(hash);
-    messageApi.destroy();
     if (receipt?.status) {
-      messageApi.success(`${type}成功`);
+      messageApi.open({
+        content: `${type}成功`,
+        type: "success",
+        key: MessageKey,
+      });
+      eventBus.emit("updateEvent");
     } else {
-      messageApi.error(`${type}失败`);
+      messageApi.open({
+        content: `${type}失败`,
+        type: "error",
+        key: MessageKey,
+      });
     }
+    setUnlockLoad(false);
+    setWithDrawLoad(false);
   };
   useEffect(() => {
     if (hash) {
-      handleLoadReceipt(hash, "解锁").finally(() => setUnlockLoad(false));
+      handleLoadReceipt(hash, "解锁").then(() => handleUpdate());
     }
     if (hash2) {
-      handleLoadReceipt(hash2, "提现").finally(() => setWithDrawLoad(false));
+      handleLoadReceipt(hash2, "提现").then(() => handleUpdate());
     }
-    if (unLockErr) {
-      messageApi.error(unLockErr.message);
+    if (unLockErr || withDrawErr) {
+      const msg = unLockErr || withDrawErr;
+      messageApi.error(msg?.message);
       setUnlockLoad(false);
-    }
-    if (withDrawErr) {
-      messageApi.error(withDrawErr.message);
       setWithDrawLoad(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -174,7 +192,7 @@ export default function TotalCard() {
   return (
     <div className="flex  h-120px font-size-12px gap-10px">
       {messageContext}
-      <div className="flex-1 w-25% h-100% flex flex-col justify-between">
+      <div className="flex-1 w-20% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>全网质押veQday</div>
           <div>{totalStake}QDAY</div>
@@ -195,7 +213,7 @@ export default function TotalCard() {
         </div>
       </div>
 
-      <div className="flex-1 w-25% h-100% flex flex-col justify-between">
+      <div className="flex-1 w-20% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>我的质押veQday</div>
           <div>{userStakeVal}QDAY</div>
@@ -217,7 +235,18 @@ export default function TotalCard() {
         </div>
       </div>
 
-      <div className="flex-1 w-25% h-100% flex flex-col justify-between">
+      <div className="flex-1 w-20% h-100% flex flex-col justify-between">
+        <div className="flex flex-col justify-between">
+          <div>我的wAbel</div>
+          <div>{mywabelBalance}QDAY</div>
+        </div>
+        <div className="flex flex-col justify-between">
+          <div>我的veQday</div>
+          <div>{myqdayBalance}QDAY</div>
+        </div>
+      </div>
+
+      <div className="flex-1 w-20% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>我的收益</div>
           <div>{myReward}QDAY</div>
@@ -227,7 +256,7 @@ export default function TotalCard() {
           <div>{totalReward}QDAY</div>
         </div>
       </div>
-      <div className="flex-1 w-25% h-100% flex flex-col justify-between">
+      <div className="flex-1 w-20% h-100% flex flex-col justify-between">
         <div className="flex flex-col justify-between">
           <div>我的余额</div>
           <div>{balance} QDAY</div>
