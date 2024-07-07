@@ -107,15 +107,33 @@ export default function TotalCard() {
       setBalance(toFixed(bs) + "");
     }
   };
-
+  // 重置数据
+  const handleResetData = () => {
+    setTotalStake("0");
+    setUserStakeVal("0");
+    setTotalReward("0");
+    setMyReward("0");
+    setUnLockReward("0");
+    setmywabel("0");
+    setMywabelBalance("0");
+    setMyqdayBalance("0");
+    setBalance("0");
+  };
   const handleUpdate = () => {
     handleGetBalance();
     handleInitContract();
   };
   useEffect(() => {
+    let t = null;
     if (address && isConnected) {
       handleUpdate();
+      t = setInterval(handleUpdate, 7000);
+    } else {
+      handleResetData();
     }
+    return () => {
+      if (t) clearInterval(t);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, isConnected]);
   // 解锁

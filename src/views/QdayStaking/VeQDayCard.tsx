@@ -16,8 +16,14 @@ export default function VeQDayCard() {
   const provider = new JsonRpcProvider(RPC_URL);
   const veqdayContractIns = useRef<Contract>();
   const { address, isConnected } = useWeb3ModalAccount();
-  const [myveqday, setMyveqday] = useState("");
   const [messageApi, MessageContext] = message.useMessage();
+  const checkIsconnect = () => {
+    if (address && isConnected) {
+      return Promise.resolve();
+    }
+    eventBus.emit("toLogin");
+    return Promise.reject();
+  };
   const handleShowLoading = (type: string, key: string) => {
     messageApi.open({
       duration: 0,
@@ -92,17 +98,19 @@ export default function VeQDayCard() {
   const [isApprove, setIsApprove] = useState(false);
   const [approveVal, setApproveVal] = useState(0);
   const [val3, setVal3] = useState("");
-  const handleVeStake = () => {
+  const handleVeStake = async () => {
+    await checkIsconnect();
     if (!val) {
       return;
     }
-    if (Number(myveqday) < Number(val)) {
-      messageApi.warning("您的VeQday余额不足");
-      return;
-    }
-    if (approveVal < Number(val)) {
+    if (Number(formatEther(approveVal)) < Number(val)) {
       message.warning("授权额度不足");
       handleApprove();
+      return;
+    }
+    const v = await getMyVeQday();
+    if (Number(v) < Number(val)) {
+      messageApi.warning("您的VeQday余额不足");
       return;
     }
     // VEQday 质押
@@ -114,7 +122,8 @@ export default function VeQDayCard() {
     });
   };
   // 兑换 VeQday
-  const handleDesposit = () => {
+  const handleDesposit = async () => {
+    await checkIsconnect();
     if (!val3) {
       return;
     }
@@ -126,11 +135,18 @@ export default function VeQDayCard() {
     });
   };
   // 质押Qday
-  const handleQdayStake = () => {
+  const handleQdayStake = async () => {
+    await checkIsconnect();
+
     if (!val1) {
       return;
     }
-
+    const b = await provider.getBalance(address as ethers.AddressLike);
+    const bs = formatEther(BigInt(b).toString());
+    if (Number(val1) > Number(bs)) {
+      message.warning("Qday余额不足");
+      return;
+    }
     writeQdayContract({
       address: coreContract,
       abi: QDayABI.abi,
@@ -139,7 +155,9 @@ export default function VeQDayCard() {
     });
   };
   // VEQday解除质押
-  const handleUnStake = () => {
+  const handleUnStake = async () => {
+    await checkIsconnect();
+
     if (!val2) {
       return;
     }
@@ -152,7 +170,8 @@ export default function VeQDayCard() {
   };
 
   // 授权合约
-  const handleApprove = () => {
+  const handleApprove = async () => {
+    await checkIsconnect();
     writeArrroveContract({
       address: veContract,
       abi: VeQDayABI.abi,
@@ -236,15 +255,17 @@ export default function VeQDayCard() {
   // 查詢我的veqday
   const getMyVeQday = async () => {
     const res8 = await veqdayContractIns.current?.balanceOf(address);
-    setMyveqday(formatEther(res8 ? res8.toString() : "0"));
+    return formatEther(res8 ? res8.toString() : "0");
   };
   // 初始化合约实例
   const handleInitContract = async () => {
-    veqdayContractIns.current = await getContractInstance(
-      provider,
-      veContract,
-      VeQDayABI.abi
-    );
+    if (!veqdayContractIns.current) {
+      veqdayContractIns.current = await getContractInstance(
+        provider,
+        veContract,
+        VeQDayABI.abi
+      );
+    }
 
     getIsApprove();
     getMyVeQday();
@@ -255,10 +276,15 @@ export default function VeQDayCard() {
     setIsApprove(Boolean(v));
     setApproveVal(v);
   };
-
+  const handleInitData = () => {
+    setIsApprove(false);
+    setApproveVal(0);
+  };
   useEffect(() => {
     if (address && isConnected) {
       handleInitContract();
+    } else {
+      handleInitData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, isConnected]);
