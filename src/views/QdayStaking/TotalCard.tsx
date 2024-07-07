@@ -127,6 +127,7 @@ export default function TotalCard() {
     let t = null;
     if (address && isConnected) {
       handleUpdate();
+      if (t) clearInterval(t);
       t = setInterval(handleUpdate, 7000);
     } else {
       handleResetData();
