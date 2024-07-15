@@ -6,5 +6,7 @@ type Events = {
   uploadUnlockWAbel: void;
   // 提现奖金
   uploadWithDrawReward: void;
+  // 去登录
+  toLogin: void;
 };
 export const eventBus: Emitter<Events> = mitt<Events>();

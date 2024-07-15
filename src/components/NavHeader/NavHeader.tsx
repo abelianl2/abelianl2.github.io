@@ -2,6 +2,8 @@ import { Button, Popover } from "antd";
 import { web3Modal } from "../../utils/web3Modal";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { addressDots } from "../../utils/utils";
+import { useEffect } from "react";
+import { eventBus } from "../../events/events";
 
 export default function NavHeader() {
   const HEADER_MENUS = [
@@ -29,6 +31,13 @@ export default function NavHeader() {
   const handleDisconnect = () => {
     web3Modal.disconnect();
   };
+
+  useEffect(() => {
+    eventBus.on("toLogin", handleConnect);
+    return () => {
+      eventBus.off("toLogin", handleConnect);
+    };
+  }, []);
 
   return (
     <div className="flex bg-#141E2A h-72px justify-between items-center">
