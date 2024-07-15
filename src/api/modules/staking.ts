@@ -1,6 +1,6 @@
-import { isDev } from "../../const/enum";
+import { apiPath } from "../../const/enum";
 import { service } from "../services";
-const API_PATH = isDev ? "/api" : "https://deposit-test.qday.ninja:9002/api";
+const API_PATH = apiPath;
 export type SubmitWithMemoParams = {
   from_network: string;
   to_network: string;

@@ -18,3 +18,5 @@ export const lockUpPeriod = isProd ? lockUpPeriod_prod : lockUpPeriod_dev;
 export const coreContract = import.meta.env.VITE_QDAYCORE;
 export const wabelContract = import.meta.env.VITE_WABEL;
 export const veContract = import.meta.env.VITE_VEQDAY;
+
+export const apiPath = import.meta.env.VITE_API_PATH;
