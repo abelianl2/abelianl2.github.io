@@ -1,6 +1,6 @@
 import { Input, Button, message } from "antd";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
-import { RPC_URL, getContractInstance } from "../../utils/web3Modal";
+import { getContractInstance } from "../../utils/web3Modal";
 import QDayABI from "../../assets/json/QdayCore.json";
 import VeQDayABI from "../../assets/json/VeQday.json";
 import { ethers, formatEther, parseEther } from "ethers";
@@ -10,7 +10,7 @@ import { JsonRpcProvider } from "ethers";
 import { Contract } from "ethers";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { getMsgKey } from "../../utils/utils";
-import { coreContract, veContract } from "../../const/enum";
+import { coreContract, RPC_URL, veContract } from "../../const/enum";
 
 export default function VeQDayCard() {
   const provider = new JsonRpcProvider(RPC_URL);

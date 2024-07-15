@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { RPC_URL, getContractInstance } from "../../utils/web3Modal";
+import { getContractInstance } from "../../utils/web3Modal";
 import { JsonRpcProvider, ethers, formatEther } from "ethers";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { getMsgKey, toFixed } from "../../utils/utils";
@@ -9,7 +9,12 @@ import veyABI from "../../assets/json/VeQday.json";
 import wablABI from "../../assets/json/WAbl.json";
 import { eventBus } from "../../events/events";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
-import { coreContract, veContract, wabelContract } from "../../const/enum";
+import {
+  coreContract,
+  RPC_URL,
+  veContract,
+  wabelContract,
+} from "../../const/enum";
 export default function TotalCard() {
   const [balance, setBalance] = useState("0");
   const [messageApi, messageContext] = message.useMessage();

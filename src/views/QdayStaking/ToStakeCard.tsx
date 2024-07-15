@@ -4,10 +4,9 @@ import { useEffect, useState } from "react";
 import { useWeb3ModalProvider } from "@web3modal/ethers/react";
 import qdayCoreABI from "../../assets/json/QdayCore.json";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
-import { RPC_URL } from "../../utils/web3Modal";
 import RewardTable from "./RewardTable";
 import { eventBus } from "../../events/events";
-import { coreContract } from "../../const/enum";
+import { coreContract, RPC_URL } from "../../const/enum";
 
 export default function ToStakeCard() {
   const [stakeVal, setStake] = useState("");
