@@ -1,35 +1,34 @@
 import { Web3Modal } from "@web3modal/ethers";
 import { createWeb3Modal, defaultConfig } from "@web3modal/ethers/react";
 import { ethers } from "ethers";
+import {
+  CHAIN_CURRENCY,
+  CHAIN_DECLIMALS,
+  CHAIN_ID,
+  CHAIN_LOGO,
+  CHAIN_NAME,
+  DESCRIPTION,
+  DOMAIN_HOST,
+  EXPLORER_URL,
+  PROJECT_ID,
+  RPC_URL,
+} from "../const/enum";
 
-// 项目id 通过 walletConnect cloud创建
-export const projectId = "fcecdc049765b0a170b43b92bba0ccf3";
-
-// 官网域名
-export const VITE_HOST = import.meta.env.VITE_HOST;
-
-// 链配置
-export const CHAIN_ID = 1001;
-export const RPC_URL = "http://159.138.82.123:8123";
-export const CHAIN_NAME = "QDay";
-export const CHAIN_CURRENCY = "QDAY";
-export const CHAIN_LOGO = `${VITE_HOST}/src/assets/icon.svg`;
-export const EXPLORERURL = "https://etherscan.io";
-export const DESCRIPTION = "My Website description";
 // 2. Set chains
 export const myMainnet = {
   chainId: CHAIN_ID,
   name: CHAIN_NAME,
   currency: CHAIN_CURRENCY,
-  explorerUrl: EXPLORERURL,
+  explorerUrl: EXPLORER_URL,
   rpcUrl: RPC_URL,
+  declimals: CHAIN_DECLIMALS,
 };
 
 // 3. Create a metadata object
 const metadata = {
   name: CHAIN_NAME,
   description: DESCRIPTION,
-  url: VITE_HOST, // origin must match your domain & subdomain
+  url: DOMAIN_HOST, // origin must match your domain & subdomain
   icons: [CHAIN_LOGO],
 };
 
@@ -49,7 +48,7 @@ const ethersConfig = defaultConfig({
 export const web3Modal: Web3Modal = createWeb3Modal({
   ethersConfig,
   chains: [myMainnet],
-  projectId,
+  projectId: PROJECT_ID,
   enableAnalytics: false, // 默认使用云配置
 });
 

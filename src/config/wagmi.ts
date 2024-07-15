@@ -1,11 +1,15 @@
 import { http, createConfig } from "wagmi";
-// import { mainnet, sepolia } from "wagmi/chains";
 import {
   CHAIN_CURRENCY,
+  CHAIN_DECLIMALS,
   CHAIN_ID,
   CHAIN_NAME,
+  EXPLORER_API_URL,
+  EXPLORER_NAME,
+  EXPLORER_URL,
   RPC_URL,
-} from "../utils/web3Modal";
+} from "../const/enum";
+
 const customChain = {
   id: CHAIN_ID,
   name: CHAIN_NAME,
@@ -13,7 +17,7 @@ const customChain = {
   nativeCurrency: {
     name: CHAIN_NAME,
     symbol: CHAIN_CURRENCY,
-    decimals: 18, // 原生代币的小数位数
+    decimals: CHAIN_DECLIMALS, // 原生代币的小数位数
   },
   rpcUrls: {
     default: {
@@ -22,9 +26,9 @@ const customChain = {
   },
   blockExplorers: {
     default: {
-      name: "Etherscan",
-      url: "https://etherscan.io",
-      apiUrl: "https://api.etherscan.io/api",
+      name: EXPLORER_NAME,
+      url: EXPLORER_URL,
+      apiUrl: EXPLORER_API_URL,
     },
   },
   contracts: {}, // 可选

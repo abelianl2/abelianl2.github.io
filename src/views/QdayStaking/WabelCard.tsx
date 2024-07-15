@@ -2,11 +2,11 @@ import { Table, TableColumnsType, Modal, Button } from "antd";
 import { useEffect, useRef, useState } from "react";
 import success from "../../assets/success.svg";
 import dayjs from "dayjs";
-import { RPC_URL, getContractInstance } from "../../utils/web3Modal";
+import { getContractInstance } from "../../utils/web3Modal";
 import { JsonRpcProvider, ethers, formatEther } from "ethers";
 import wablABI from "../../assets/json/WAbl.json";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
-import { wabelContract } from "../../const/enum";
+import { RPC_URL, wabelContract } from "../../const/enum";
 export type RewardListItem = {
   amount: string;
   date: string;
